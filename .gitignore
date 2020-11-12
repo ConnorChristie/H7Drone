@@ -1,0 +1,6 @@
+.vs/
+.visualgdb/
+Debug/
+ProfilingReports/
+*.user
+

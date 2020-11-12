@@ -1,0 +1,27 @@
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30621.155
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "H7Drone", "H7Drone\H7Drone.vcxproj", "{C41EDD59-F58B-4995-83E3-CE799FA70B2A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x86 = Debug|x86
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C41EDD59-F58B-4995-83E3-CE799FA70B2A}.Debug|x64.ActiveCfg = Debug|Win32
+		{C41EDD59-F58B-4995-83E3-CE799FA70B2A}.Debug|x86.ActiveCfg = Debug|Win32
+		{C41EDD59-F58B-4995-83E3-CE799FA70B2A}.Debug|x86.Build.0 = Debug|Win32
+		{C41EDD59-F58B-4995-83E3-CE799FA70B2A}.Release|x64.ActiveCfg = Release|Win32
+		{C41EDD59-F58B-4995-83E3-CE799FA70B2A}.Release|x86.ActiveCfg = Release|Win32
+		{C41EDD59-F58B-4995-83E3-CE799FA70B2A}.Release|x86.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {07BC59B8-27F8-4C1B-9893-F9D98D47CD50}
+	EndGlobalSection
+EndGlobal
