@@ -83,6 +83,7 @@ typedef enum {
 	TASK_ACCEL,
 	TASK_COMPASS,
 	TASK_FLIGHT,
+	TASK_DSHOT,
 	/* Count of real tasks */
 	TASK_COUNT,
 

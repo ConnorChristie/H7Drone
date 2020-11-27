@@ -978,6 +978,9 @@
     <ClInclude Include="$(EFP_BASE)\Profiler\DebuggerChecker.h">
       <Filter>Header files\Device-specific files\Semihosting/Profiler</Filter>
     </ClInclude>
+    <ClCompile Include="dshot.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="flight.h">
@@ -1008,6 +1011,9 @@
       <Filter>Header files</Filter>
     </ClInclude>
     <ClInclude Include="tasks.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="dshot.h">
       <Filter>Header files</Filter>
     </ClInclude>
   </ItemGroup>

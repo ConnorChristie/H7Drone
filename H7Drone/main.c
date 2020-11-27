@@ -1,14 +1,18 @@
 #include <stm32h7xx_hal.h>
 #include <stm32_hal_legacy.h>
+#include <SysprogsProfiler.h>
+#include <stdlib.h>
+#include <string.h>
 
 #include "system.h"
 #include "scheduler.h"
 #include "imu.h"
-#include <SysprogsProfiler.h>
+#include "dshot.h"
 
 static void SPI1_Init(void);
 static void SPI4_Init(void);
 void SystemClock_Config(void);
+static void TIM_Init(void);
 
 int main(void)
 {
@@ -34,15 +38,18 @@ int main(void)
 
 	SPI1_Init();
 	//SPI4_Init();
+	//TIM_Init();
+	pwmDshotMotorHardwareConfig();
 
 	schedulerInit();
 	schedulerSetCalulateTaskStatistics(true);
-	setTaskEnabled(TASK_LED, true);
 	setTaskEnabled(TASK_GYRO, true);
 	setTaskEnabled(TASK_FILTER, false);
 	setTaskEnabled(TASK_ACCEL, true);
 	setTaskEnabled(TASK_COMPASS, false);
 	setTaskEnabled(TASK_FLIGHT, true);
+	setTaskEnabled(TASK_DSHOT, true);
+	setTaskEnabled(TASK_LED, true);
 
 	GPIO_InitTypeDef GPIO_InitStructure;
 	GPIO_InitStructure.Pin = GPIO_PIN_3;
@@ -55,6 +62,40 @@ int main(void)
 	{
 		scheduler();
 	}
+}
+
+uint32_t timerClock(TIM_TypeDef *tim)
+{
+	int timpre;
+	uint32_t pclk;
+	uint32_t ppre;
+
+	// Implement the table:
+	// RM0433 "Table 48. Ratio between clock timer and pclk"
+
+	if (tim == TIM1 || tim == TIM8 || tim == TIM15 || tim == TIM16 || tim == TIM17)
+	{
+		// Timers on APB2
+		pclk = HAL_RCC_GetPCLK2Freq();
+		ppre = (RCC->D2CFGR & RCC_D2CFGR_D2PPRE2) >> RCC_D2CFGR_D2PPRE2_Pos;
+	}
+	else
+	{
+		// Timers on APB1
+		pclk = HAL_RCC_GetPCLK1Freq();
+		ppre = (RCC->D2CFGR & RCC_D2CFGR_D2PPRE1) >> RCC_D2CFGR_D2PPRE1_Pos;
+	}
+
+	timpre = (RCC->CFGR & RCC_CFGR_TIMPRE) ? 1 : 0;
+
+	int index = (timpre << 3) | ppre;
+
+	static uint8_t periphToKernel[16] = { // The mutiplier table
+		1, 1, 1, 1, 2, 2, 2, 2, // TIMPRE = 0
+		1, 1, 1, 1, 2, 4, 4, 4  // TIMPRE = 1
+	};
+
+	return pclk * periphToKernel[index];
 }
 
 static void SPI1_Init(void)

@@ -47,7 +47,7 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <NMakeIncludeSearchPath>.;$(BSP_ROOT)\STM32H7xxxx\STM32H7xx_HAL_Driver\Inc;$(BSP_ROOT)\STM32H7xxxx\STM32H7xx_HAL_Driver\Inc\Legacy;$(BSP_ROOT)\STM32H7xxxx\CMSIS_HAL\Core\Include;$(BSP_ROOT)\STM32H7xxxx\CMSIS_HAL\Device\ST\STM32H7xx\Include;$(BSP_ROOT)\STM32H7xxxx\CMSIS_HAL\Include;$(BSP_ROOT)\STM32H7xxxx\CMSIS_HAL\RTOS2\Include;$(EFP_BASE)\Profiler;$(TOOLCHAIN_ROOT)\arm-none-eabi\include\c++\9.3.1;$(TOOLCHAIN_ROOT)\arm-none-eabi\include\c++\9.3.1\arm-none-eabi\thumb\v7e-m+dp\hard;$(TOOLCHAIN_ROOT)\arm-none-eabi\include\c++\9.3.1\backward;$(TOOLCHAIN_ROOT)\lib\gcc\arm-none-eabi\9.3.1\include;$(TOOLCHAIN_ROOT)\lib\gcc\arm-none-eabi\9.3.1\include-fixed;$(TOOLCHAIN_ROOT)\arm-none-eabi\include;$(EFP_BASE)/Profiler;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
+    <NMakeIncludeSearchPath>.;$(BSP_ROOT)\STM32H7xxxx\STM32H7xx_HAL_Driver\Inc;$(BSP_ROOT)\STM32H7xxxx\STM32H7xx_HAL_Driver\Inc\Legacy;$(BSP_ROOT)\STM32H7xxxx\CMSIS_HAL\Core\Include;$(BSP_ROOT)\STM32H7xxxx\CMSIS_HAL\Device\ST\STM32H7xx\Include;$(BSP_ROOT)\STM32H7xxxx\CMSIS_HAL\Include;$(BSP_ROOT)\STM32H7xxxx\CMSIS_HAL\RTOS2\Include;$(EFP_BASE)\Profiler;$(TOOLCHAIN_ROOT)\arm-none-eabi\include\c++\9.3.1;$(TOOLCHAIN_ROOT)\arm-none-eabi\include\c++\9.3.1\arm-none-eabi\thumb\v7e-m+dp\hard;$(TOOLCHAIN_ROOT)\arm-none-eabi\include\c++\9.3.1\backward;$(TOOLCHAIN_ROOT)\lib\gcc\arm-none-eabi\9.3.1\include;$(TOOLCHAIN_ROOT)\lib\gcc\arm-none-eabi\9.3.1\include-fixed;$(TOOLCHAIN_ROOT)\arm-none-eabi\include;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
     <NMakeForcedIncludes>$(ProjectDir)\gcc_Debug.h;$(VISUALGDB_DIR)\gcc_compat.h;$(BSP_ROOT)\stm32_compat.h;$(NMakeForcedIncludes)</NMakeForcedIncludes>
     <NMakeBuildCommandLine>"$(VISUALGDB_DIR)\VisualGDB.exe" /build "$(ProjectPath)" "/solution:$(SolutionPath)"  "/config:$(Configuration)" "/platform:$(Platform)"</NMakeBuildCommandLine>
     <NMakeCleanCommandLine>"$(VISUALGDB_DIR)\VisualGDB.exe" /clean "$(ProjectPath)" "/solution:$(SolutionPath)"  "/config:$(Configuration)" "/platform:$(Platform)"</NMakeCleanCommandLine>
@@ -73,6 +73,7 @@
   </ImportGroup>
   <ItemGroup />
   <ItemGroup>
+    <ClCompile Include="dshot.c" />
     <ClCompile Include="flight.c" />
     <ClCompile Include="icm20602.c" />
     <ClCompile Include="imu.c" />
@@ -85,6 +86,7 @@
     <ClCompile Include="system.c" />
     <ClCompile Include="system_stm32h7xx.c" />
     <ClCompile Include="tasks.c" />
+    <ClInclude Include="dshot.h" />
     <ClInclude Include="system.h" />
     <ClInclude Include="tasks.h" />
     <None Include="startup_stm32h743xx.s" />

@@ -17,7 +17,7 @@ CFLAGS := -ggdb -ffunction-sections -O0
 CXXFLAGS := -ggdb -ffunction-sections -fno-exceptions -fno-rtti -O0
 ASFLAGS := 
 LDFLAGS := -Wl,-gc-sections -Wl,-q
-COMMONFLAGS := 
+COMMONFLAGS := -DUSE_HAL_DRIVER -DUSE_FULL_LL_DRIVER
 LINKER_SCRIPT := STM32H743VI_flash.lds
 
 START_GROUP := -Wl,--start-group

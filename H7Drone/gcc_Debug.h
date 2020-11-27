@@ -179,6 +179,9 @@
 #ifndef __UINT_FAST8_MAX__
 #define __UINT_FAST8_MAX__ 0xffffffffU
 #endif
+#ifndef USE_FULL_LL_DRIVER
+#define USE_FULL_LL_DRIVER 1
+#endif
 #ifndef __cpp_rvalue_reference
 #define __cpp_rvalue_reference 200610
 #endif

@@ -1,6 +1,7 @@
 #include "tasks.h"
 #include "imu.h"
 #include "flight.h"
+#include "dshot.h"
 
 #include <stm32h7xx_hal.h>
 #include <stdio.h>
@@ -48,7 +49,8 @@ task_t tasks[TASK_COUNT] = {
 	[TASK_FILTER] = DEFINE_TASK("FILTER", NULL, NULL, taskFiltering, TASK_PERIOD_US(125), TASK_PRIORITY_REALTIME),
 	[TASK_ACCEL] = DEFINE_TASK("ACCEL", NULL, NULL, taskAccelSample, TASK_PERIOD_HZ(1000), TASK_PRIORITY_MEDIUM),
 	[TASK_COMPASS] = DEFINE_TASK("COMPASS", NULL, NULL, taskMagSample, TASK_PERIOD_HZ(40), TASK_PRIORITY_LOW),
-	[TASK_FLIGHT] = DEFINE_TASK("FLIGHT", NULL, NULL, flightUpdate, TASK_PERIOD_US(10000), TASK_PRIORITY_HIGH)
+	[TASK_FLIGHT] = DEFINE_TASK("FLIGHT", NULL, NULL, flightUpdate, TASK_PERIOD_US(10000), TASK_PRIORITY_HIGH),
+	[TASK_DSHOT] = DEFINE_TASK("DSHOT", NULL, NULL, dshotWrite, TASK_PERIOD_US(500), TASK_PRIORITY_HIGH)
 };
 
 task_t* getTask(uint8_t taskId)
