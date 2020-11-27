@@ -981,6 +981,12 @@
     <ClCompile Include="dshot.c">
       <Filter>Source files</Filter>
     </ClCompile>
+    <ClCompile Include="timer.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="rcc.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="flight.h">
@@ -1014,6 +1020,15 @@
       <Filter>Header files</Filter>
     </ClInclude>
     <ClInclude Include="dshot.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="platform.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="timer.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="rcc.h">
       <Filter>Header files</Filter>
     </ClInclude>
   </ItemGroup>

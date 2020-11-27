@@ -12,7 +12,7 @@
 static void SPI1_Init(void);
 static void SPI4_Init(void);
 void SystemClock_Config(void);
-static void TIM_Init(void);
+void initMotors(void);
 
 int main(void)
 {
@@ -29,6 +29,7 @@ int main(void)
 	__HAL_RCC_GPIOF_CLK_ENABLE();
 	__HAL_RCC_GPIOG_CLK_ENABLE();
 	__HAL_RCC_GPIOH_CLK_ENABLE();
+	__HAL_RCC_DMA1_CLK_ENABLE();
 
 	// Enable CPU L1-Cache
 	SCB_EnableICache();
@@ -38,8 +39,7 @@ int main(void)
 
 	SPI1_Init();
 	//SPI4_Init();
-	//TIM_Init();
-	pwmDshotMotorHardwareConfig();
+	initMotors();
 
 	schedulerInit();
 	schedulerSetCalulateTaskStatistics(true);
@@ -64,38 +64,23 @@ int main(void)
 	}
 }
 
-uint32_t timerClock(TIM_TypeDef *tim)
+void initMotors(void)
 {
-	int timpre;
-	uint32_t pclk;
-	uint32_t ppre;
-
-	// Implement the table:
-	// RM0433 "Table 48. Ratio between clock timer and pclk"
-
-	if (tim == TIM1 || tim == TIM8 || tim == TIM15 || tim == TIM16 || tim == TIM17)
-	{
-		// Timers on APB2
-		pclk = HAL_RCC_GetPCLK2Freq();
-		ppre = (RCC->D2CFGR & RCC_D2CFGR_D2PPRE2) >> RCC_D2CFGR_D2PPRE2_Pos;
-	}
-	else
-	{
-		// Timers on APB1
-		pclk = HAL_RCC_GetPCLK1Freq();
-		ppre = (RCC->D2CFGR & RCC_D2CFGR_D2PPRE1) >> RCC_D2CFGR_D2PPRE1_Pos;
-	}
-
-	timpre = (RCC->CFGR & RCC_CFGR_TIMPRE) ? 1 : 0;
-
-	int index = (timpre << 3) | ppre;
-
-	static uint8_t periphToKernel[16] = { // The mutiplier table
-		1, 1, 1, 1, 2, 2, 2, 2, // TIMPRE = 0
-		1, 1, 1, 1, 2, 4, 4, 4  // TIMPRE = 1
+	motorInstance_t motor = {
+		.timer = { 
+			.pinPack = GPIOB,
+			.pin = GPIO_PIN_1,
+			.alternateFunction = GPIO_AF2_TIM3,
+			.instance = TIM3,
+			.channel = LL_TIM_CHANNEL_CH4
+		},
+		.dma = {
+			.instance = DMA1,
+			.stream = LL_DMA_STREAM_2
+		}
 	};
 
-	return pclk * periphToKernel[index];
+	dshotInit(0, motor);
 }
 
 static void SPI1_Init(void)

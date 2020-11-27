@@ -90,7 +90,7 @@ void spiBusReadRegisterBuffer(spiInstance_t *spi, uint8_t reg, uint8_t *data, ui
 	csHigh(spi);
 }
 
-void spiBusReadBuffer(spiInstance_t *spi, uint8_t *txData, uint8_t *rxData, uint8_t length)
+void spiBusReadBuffer(spiInstance_t *spi, const uint8_t *txData, uint8_t *rxData, uint8_t length)
 {
 	csLow(spi);
 	spiTransfer(spi, txData, rxData, length);
