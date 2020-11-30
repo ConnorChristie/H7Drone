@@ -1,4 +1,5 @@
 #include "timer.h"
+#include <stm32h7xx_ll_tim.h>
 
 rccPeriphTag_t timerRCC(TIM_TypeDef *tim)
 {
@@ -44,6 +45,45 @@ u32 timerClock(TIM_TypeDef *tim)
 	};
 
 	return pclk * periphToKernel[index];
+}
+
+u16 timerDmaSource(u8 channel)
+{
+	switch (channel) {
+	case TIM_CHANNEL_1:
+		return TIM_DMA_CC1;
+	case TIM_CHANNEL_2:
+		return TIM_DMA_CC2;
+	case TIM_CHANNEL_3:
+		return TIM_DMA_CC3;
+	case TIM_CHANNEL_4:
+		return TIM_DMA_CC4;
+	}
+	return 0;
+}
+
+#define LL_TIM_IT(tim, cc, state) \
+	if (state == ENABLE) \
+		LL_TIM_EnableDMAReq_ ## cc(tim); \
+	else \
+		LL_TIM_DisableDMAReq_ ## cc(tim);
+
+void timerSetDMAReq(TIM_TypeDef *tim, u8 channel, FunctionalState state)
+{
+	switch (channel) {
+	case TIM_CHANNEL_1:
+		LL_TIM_IT(tim, CC1, state);
+		break;
+	case TIM_CHANNEL_2:
+		LL_TIM_IT(tim, CC2, state);
+		break;
+	case TIM_CHANNEL_3:
+		LL_TIM_IT(tim, CC3, state);
+		break;
+	case TIM_CHANNEL_4:
+		LL_TIM_IT(tim, CC4, state);
+		break;
+	}
 }
 
 #ifdef STM32H7

@@ -14,12 +14,47 @@ static void SPI4_Init(void);
 void SystemClock_Config(void);
 void initMotors(void);
 
+#define VECT_TAB_OFFSET  0x00
+
 int main(void)
 {
 	HAL_Init();
 	SystemClock_Config();
 	InitializeInstrumentingProfiler();
 	InitializeSamplingProfiler();
+
+	HAL_MPU_Disable();
+
+	MPU_Region_InitTypeDef MPU_InitStruct;
+	MPU_InitStruct.Enable           = MPU_REGION_ENABLE;
+	MPU_InitStruct.SubRegionDisable = 0x00;
+	MPU_InitStruct.TypeExtField     = MPU_TEX_LEVEL0;
+
+	MPU_InitStruct.Number           = 0;
+	MPU_InitStruct.BaseAddress      = 0x00000000;
+	MPU_InitStruct.Size             = MPU_REGION_SIZE_64KB;
+	MPU_InitStruct.AccessPermission = MPU_REGION_PRIV_RO_URO;
+	MPU_InitStruct.DisableExec      = MPU_INSTRUCTION_ACCESS_ENABLE;
+	MPU_InitStruct.IsShareable      = MPU_ACCESS_NOT_SHAREABLE;
+	MPU_InitStruct.IsCacheable      = MPU_ACCESS_NOT_CACHEABLE;
+	MPU_InitStruct.IsBufferable     = MPU_ACCESS_BUFFERABLE;
+	HAL_MPU_ConfigRegion(&MPU_InitStruct);
+
+	MPU_InitStruct.Number           = 1;
+	MPU_InitStruct.BaseAddress      = 0x30000000;
+	MPU_InitStruct.Size             = 0x0d;
+	MPU_InitStruct.AccessPermission = MPU_REGION_FULL_ACCESS;
+	MPU_InitStruct.DisableExec      = MPU_INSTRUCTION_ACCESS_ENABLE;
+	MPU_InitStruct.IsShareable      = MPU_ACCESS_SHAREABLE;
+	MPU_InitStruct.IsCacheable      = MPU_ACCESS_CACHEABLE;
+	MPU_InitStruct.IsBufferable     = MPU_ACCESS_NOT_BUFFERABLE;
+	HAL_MPU_ConfigRegion(&MPU_InitStruct);
+
+	HAL_MPU_Enable(MPU_PRIVILEGED_DEFAULT);
+
+	// Enable CPU L1-Cache
+	SCB_EnableICache();
+	SCB_EnableDCache();
 
 	__HAL_RCC_GPIOA_CLK_ENABLE();
 	__HAL_RCC_GPIOB_CLK_ENABLE();
@@ -29,11 +64,6 @@ int main(void)
 	__HAL_RCC_GPIOF_CLK_ENABLE();
 	__HAL_RCC_GPIOG_CLK_ENABLE();
 	__HAL_RCC_GPIOH_CLK_ENABLE();
-	__HAL_RCC_DMA1_CLK_ENABLE();
-
-	// Enable CPU L1-Cache
-	SCB_EnableICache();
-	SCB_EnableDCache();
 
 	cycleCounterInit();
 
@@ -72,11 +102,12 @@ void initMotors(void)
 			.pin = GPIO_PIN_1,
 			.alternateFunction = GPIO_AF2_TIM3,
 			.instance = TIM3,
-			.channel = LL_TIM_CHANNEL_CH4
+			.channel = TIM_CHANNEL_4
 		},
 		.dma = {
 			.instance = DMA1,
-			.stream = LL_DMA_STREAM_2
+			.stream = LL_DMA_STREAM_2,
+			.channel = LL_DMAMUX1_REQ_TIM3_CH4
 		}
 	};
 

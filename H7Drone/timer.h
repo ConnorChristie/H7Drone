@@ -11,6 +11,8 @@ typedef struct timerDef_s {
 
 rccPeriphTag_t timerRCC(TIM_TypeDef *tim);
 u32 timerClock(TIM_TypeDef *tim);
+u16 timerDmaSource(u8 channel);
+void timerSetDMAReq(TIM_TypeDef *tim, u8 channel, FunctionalState state);
 
 #ifdef STM32H7
 #define HARDWARE_TIMER_DEFINITION_COUNT 17

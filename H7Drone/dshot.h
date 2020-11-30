@@ -8,7 +8,7 @@
 
 #define MOTOR_BIT_0           7
 #define MOTOR_BIT_1           14
-#define MOTOR_BITLENGTH       19
+#define MOTOR_BITLENGTH       20
 
 #define DSHOT_DMA_BUFFER_SIZE   18 /* resolution + frame reset (2us) */
 
@@ -19,22 +19,23 @@ typedef struct
 	u32 alternateFunction;
 
 	TIM_TypeDef *instance;
-	u32 channel;
+	u8 channel;
+	u32 llChannel;
 } timInstance_t;
 
 typedef struct
 {
 	DMA_TypeDef *instance;
 	u32 stream;
+	u32 channel;
 } dmaInstance_t;
 
 typedef struct
 {
 	timInstance_t timer;
 	dmaInstance_t dma;
+	u16 timerDmaSource;
 } motorInstance_t;
-
-extern u32 dshotOutputBuffer[4][DSHOT_DMA_BUFFER_SIZE];
 
 void dshotInit(u8 id, motorInstance_t motor);
 void dshotWrite(timeUs_t currentTimeUs);
