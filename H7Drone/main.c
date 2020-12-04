@@ -8,6 +8,7 @@
 #include "scheduler.h"
 #include "imu.h"
 #include "dshot.h"
+#include "dma.h"
 
 static void SPI1_Init(void);
 static void SPI4_Init(void);
@@ -96,22 +97,51 @@ int main(void)
 
 void initMotors(void)
 {
-	motorInstance_t motor = {
-		.timer = { 
-			.pinPack = GPIOB,
-			.pin = GPIO_PIN_1,
-			.alternateFunction = GPIO_AF2_TIM3,
-			.instance = TIM3,
-			.channel = TIM_CHANNEL_4
-		},
-		.dma = {
-			.instance = DMA1,
-			.stream = LL_DMA_STREAM_2,
-			.channel = LL_DMAMUX1_REQ_TIM3_CH4
-		}
-	};
+	motorInstance_t motor;
+
+	motor.timer.pinPack = GPIOB;
+	motor.timer.pin = GPIO_PIN_1;
+	motor.timer.alternateFunction = GPIO_AF2_TIM3;
+	motor.timer.instance = TIM3;
+	motor.timer.channel = TIM_CHANNEL_4;
+
+	motor.dma = DMA1_ST0_HANDLER;
+	motor.dmaChannel = LL_DMAMUX1_REQ_TIM3_CH4;
 
 	dshotInit(0, motor);
+
+	motor.timer.pinPack = GPIOA;
+	motor.timer.pin = GPIO_PIN_0;
+	motor.timer.alternateFunction = GPIO_AF1_TIM2;
+	motor.timer.instance = TIM2;
+	motor.timer.channel = TIM_CHANNEL_1;
+
+	motor.dma = DMA1_ST1_HANDLER;
+	motor.dmaChannel = LL_DMAMUX1_REQ_TIM2_CH1;
+
+	dshotInit(1, motor);
+
+	motor.timer.pinPack = GPIOA;
+	motor.timer.pin = GPIO_PIN_1;
+	motor.timer.alternateFunction = GPIO_AF1_TIM2;
+	motor.timer.instance = TIM2;
+	motor.timer.channel = TIM_CHANNEL_2;
+
+	motor.dma = DMA1_ST2_HANDLER;
+	motor.dmaChannel = LL_DMAMUX1_REQ_TIM2_CH2;
+
+	dshotInit(2, motor);
+
+	motor.timer.pinPack = GPIOA;
+	motor.timer.pin = GPIO_PIN_2;
+	motor.timer.alternateFunction = GPIO_AF1_TIM2;
+	motor.timer.instance = TIM2;
+	motor.timer.channel = TIM_CHANNEL_3;
+
+	motor.dma = DMA1_ST3_HANDLER;
+	motor.dmaChannel = LL_DMAMUX1_REQ_TIM2_CH3;
+
+	dshotInit(3, motor);
 }
 
 static void SPI1_Init(void)

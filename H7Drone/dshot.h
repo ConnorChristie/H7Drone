@@ -5,12 +5,19 @@
 
 #include "tasks.h"
 #include "platform.h"
+#include "dma.h"
 
 #define MOTOR_BIT_0           7
 #define MOTOR_BIT_1           14
 #define MOTOR_BITLENGTH       20
 
 #define DSHOT_DMA_BUFFER_SIZE   18 /* resolution + frame reset (2us) */
+
+typedef struct {
+	TIM_TypeDef *timer;
+	u16 outputPeriod;
+	u16 timerDmaSources;
+} motorDmaTimer_t;
 
 typedef struct
 {
@@ -25,15 +32,10 @@ typedef struct
 
 typedef struct
 {
-	DMA_TypeDef *instance;
-	u32 stream;
-	u32 channel;
-} dmaInstance_t;
-
-typedef struct
-{
 	timInstance_t timer;
-	dmaInstance_t dma;
+	motorDmaTimer_t *dmaTimer;
+	dmaIdentifier_e dma;
+	u32 dmaChannel;
 	u16 timerDmaSource;
 } motorInstance_t;
 

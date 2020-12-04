@@ -1,6 +1,6 @@
 #include "dshot.h"
 #include "timer.h"
-#include <string.h>
+#include "dma.h"
 
 __attribute__((section(".DMA_RAM"))) u32 dshotOutputBuffer[4][DSHOT_DMA_BUFFER_SIZE];
 
@@ -9,34 +9,67 @@ motorInstance_t motors[4];
 u16 prepareDshotPacket(u16 value);
 static u8 loadDmaBufferDshot(u32 *dmaBuffer, int stride, u16 packet);
 
+static u16 cnt = 0;
+timeUs_t lastTime = 0;
+
+u8 dmaMotorTimerCount = 0;
+motorDmaTimer_t dmaMotorTimers[4];
+
+bool isDmaTimerConfigured(TIM_TypeDef *timer);
+motorDmaTimer_t* getDmaTimer(TIM_TypeDef *timer);
+
 void dshotWrite(timeUs_t currentTimeUs)
 {
-	for (u8 i = 0; i < 1; i++)
+	for (u8 i = 0; i < 4; i++)
 	{
-		motorInstance_t *motor = &motors[i];
+		const motorInstance_t *motor = &motors[i];
+		dmaChannelDescriptor_t *dma = dmaGetDescriptorByIdentifier(motor->dma);
 
-		u16 packet = prepareDshotPacket(1000);
+		u16 packet = prepareDshotPacket(cnt);
 		u8 bufferSize = loadDmaBufferDshot((u32 *)&dshotOutputBuffer[i][0], 1, packet);
 
-		LL_DMA_SetDataLength(motor->dma.instance, motor->dma.stream, bufferSize);
-		LL_DMA_EnableStream(motor->dma.instance, motor->dma.stream);
+		LL_DMA_SetDataLength(dma->instance.dma, dma->instance.stream, bufferSize);
+		LL_DMA_EnableStream(dma->instance.dma, dma->instance.stream);
 
-		LL_TIM_DisableARRPreload(motor->timer.instance);
-		motor->timer.instance->ARR = MOTOR_BITLENGTH - 1;
+		motor->dmaTimer->timerDmaSources |= motor->timerDmaSource;
+	}
 
-		LL_TIM_SetCounter(motor->timer.instance, 0);
+	for (u8 i = 0; i < dmaMotorTimerCount; i++)
+	{
+		const motorDmaTimer_t *dmaTimer = &dmaMotorTimers[i];
 
-		timerSetDMAReq(motor->timer.instance, motor->timer.channel, ENABLE);
+		LL_TIM_DisableARRPreload(dmaTimer->timer);
+		dmaTimer->timer->ARR = dmaTimer->outputPeriod;
+
+		LL_TIM_SetCounter(dmaTimer->timer, 0);
+
+		SET_BIT(dmaTimer->timer->DIER, dmaTimer->timerDmaSources);
+	}
+
+	timeDelta_t delta = currentTimeUs - lastTime;
+
+	if (delta >= 20000)
+	{
+		lastTime = currentTimeUs;
+		cnt++;
+		if (cnt > 200) {
+			cnt = 0;
+		}
 	}
 }
 
-void DMA1_Stream2_IRQHandler(void)
+static void motor_DMA_IRQHandler(dmaChannelDescriptor_t* descriptor)
 {
-	if (LL_DMA_IsActiveFlag_TC2(DMA1))
+	if (DMA_GET_FLAG_STATUS(descriptor, DMA_IT_TCIF))
 	{
-		LL_DMA_DisableStream(DMA1, LL_DMA_STREAM_2);
-		timerSetDMAReq(TIM3, TIM_CHANNEL_4, DISABLE);
-		LL_DMA_ClearFlag_TC2(DMA1);
+		LL_DMA_DisableStream(descriptor->instance.dma, descriptor->instance.stream);
+
+		const motorInstance_t *motor = &motors[descriptor->userParam];
+		timerSetDMAReqStatus(motor->timer.instance, motor->timer.channel, DISABLE);
+
+		motor->dmaTimer->timerDmaSources &= ~motor->timerDmaSource;
+
+		DMA_CLEAR_FLAG(descriptor, DMA_IT_TCIF);
 	}
 }
 
@@ -48,7 +81,7 @@ void DMA1_Stream2_IRQHandler(void)
 
 void dshotInit(u8 id, motorInstance_t motor)
 {
-	motor.timerDmaSource = timerDmaSource(motor.timer.channel);
+	dmaChannelDescriptor_t *dma = dmaGetDescriptorByIdentifier(motor.dma);
 
 	switch (motor.timer.channel) {
 	case TIM_CHANNEL_1: motor.timer.llChannel = LL_TIM_CHANNEL_CH1; break;
@@ -65,15 +98,16 @@ void dshotInit(u8 id, motorInstance_t motor)
 	GPIO_InitStruct.Alternate = motor.timer.alternateFunction;
 	HAL_GPIO_Init(motor.timer.pinPack, &GPIO_InitStruct);
 
-	RCC_ClockCmd(timerRCC(motor.timer.instance), ENABLE);
-	LL_TIM_DisableCounter(motor.timer.instance);
-	LL_TIM_DeInit(motor.timer.instance);
-
+	if (!isDmaTimerConfigured(motor.timer.instance))
 	{
+		RCC_ClockCmd(timerRCC(motor.timer.instance), ENABLE);
+		LL_TIM_DisableCounter(motor.timer.instance);
+		LL_TIM_DeInit(motor.timer.instance);
+
 		LL_TIM_InitTypeDef TIM_TimeBaseStructure;
 		LL_TIM_StructInit(&TIM_TimeBaseStructure);
 
-		TIM_TimeBaseStructure.Prescaler = (u16)(lrintf((float) timerClock(motor.timer.instance) / (12 * 1000000) + 0.01f) - 1);
+		TIM_TimeBaseStructure.Prescaler = (u16)(lrintf((float) timerClock(motor.timer.instance) / MOTOR_DSHOT600_HZ + 0.01f) - 1);
 		TIM_TimeBaseStructure.Autoreload = MOTOR_BITLENGTH - 1;
 		TIM_TimeBaseStructure.ClockDivision = LL_TIM_CLOCKDIVISION_DIV1;
 		TIM_TimeBaseStructure.RepetitionCounter = 0;
@@ -81,16 +115,14 @@ void dshotInit(u8 id, motorInstance_t motor)
 		LL_TIM_Init(motor.timer.instance, &TIM_TimeBaseStructure);
 	}
 
-	LL_DMA_DisableStream(motor.dma.instance, motor.dma.stream);
-	LL_DMA_DeInit(motor.dma.instance, motor.dma.stream);
+	LL_DMA_DisableStream(dma->instance.dma, dma->instance.stream);
+	LL_DMA_DeInit(dma->instance.dma, dma->instance.stream);
 
 	{
-		RCC_ClockCmd(motor.dma.instance == DMA1 ? RCC_AHB1(DMA1) : RCC_AHB1(DMA2), ENABLE);
-
 		LL_DMA_InitTypeDef DMA_InitStructure;
 		LL_DMA_StructInit(&DMA_InitStructure);
 
-		DMA_InitStructure.PeriphRequest = motor.dma.channel;
+		DMA_InitStructure.PeriphRequest = motor.dmaChannel;
 		DMA_InitStructure.MemoryOrM2MDstAddress = (u32)&dshotOutputBuffer[id][0];
 		DMA_InitStructure.Direction = LL_DMA_DIRECTION_MEMORY_TO_PERIPH;
 		DMA_InitStructure.FIFOMode = LL_DMA_FIFOMODE_ENABLE;
@@ -98,7 +130,7 @@ void dshotInit(u8 id, motorInstance_t motor)
 		DMA_InitStructure.MemBurst = LL_DMA_MBURST_SINGLE;
 		DMA_InitStructure.PeriphBurst = LL_DMA_PBURST_SINGLE;
 
-		DMA_InitStructure.PeriphOrM2MSrcAddress = (u32)(volatile u32*)((volatile char*)&motor.timer.instance->CCR1 + motor.timer.channel);
+		DMA_InitStructure.PeriphOrM2MSrcAddress = (u32)((volatile char*)&motor.timer.instance->CCR1 + motor.timer.channel);
 		DMA_InitStructure.NbData = DSHOT_DMA_BUFFER_SIZE;
 		DMA_InitStructure.PeriphOrM2MSrcIncMode = LL_DMA_PERIPH_NOINCREMENT;
 		DMA_InitStructure.MemoryOrM2MDstIncMode = LL_DMA_MEMORY_INCREMENT;
@@ -107,11 +139,10 @@ void dshotInit(u8 id, motorInstance_t motor)
 		DMA_InitStructure.Mode = LL_DMA_MODE_NORMAL;
 		DMA_InitStructure.Priority = LL_DMA_PRIORITY_HIGH;
 
-		NVIC_SetPriority(DMA1_Stream2_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 2, 1));
-		NVIC_EnableIRQ(DMA1_Stream2_IRQn);
+		dmaSetHandler(motor.dma, motor_DMA_IRQHandler, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 2, 1), id);
 
-		LL_DMA_Init(motor.dma.instance, motor.dma.stream, &DMA_InitStructure);
-		LL_DMA_EnableIT_TC(motor.dma.instance, motor.dma.stream);
+		LL_DMA_Init(dma->instance.dma, dma->instance.stream, &DMA_InitStructure);
+		LL_DMA_EnableIT_TC(dma->instance.dma, dma->instance.stream);
 	}
 
 	LL_TIM_OC_InitTypeDef TIM_OCInitStructure;
@@ -133,6 +164,10 @@ void dshotInit(u8 id, motorInstance_t motor)
 	LL_TIM_EnableARRPreload(motor.timer.instance);
 	LL_TIM_EnableCounter(motor.timer.instance);
 
+	motor.timerDmaSource = timerDmaSource(motor.timer.channel);
+	motor.dmaTimer = getDmaTimer(motor.timer.instance);
+	motor.dmaTimer->outputPeriod = MOTOR_BITLENGTH - 1;
+
 	motors[id] = motor;
 }
 
@@ -143,8 +178,10 @@ u16 prepareDshotPacket(u16 value)
 	// compute checksum
 	int csum = 0;
 	int csum_data = packet;
-	for (int i = 0; i < 3; i++) {
-		csum ^=  csum_data;     // xor data by nibbles
+	for (int i = 0; i < 3; i++)
+	{
+		// xor data by nibbles
+		csum ^=  csum_data;
 		csum_data >>= 4;
 	}
 
@@ -158,8 +195,10 @@ u16 prepareDshotPacket(u16 value)
 static u8 loadDmaBufferDshot(u32 *dmaBuffer, int stride, u16 packet)
 {
 	int i;
-	for (i = 0; i < 16; i++) {
-		dmaBuffer[i * stride] = (packet & 0x8000) ? MOTOR_BIT_1 : MOTOR_BIT_0;   // MSB first
+	for (i = 0; i < 16; i++)
+	{
+		// MSB first
+		dmaBuffer[i * stride] = (packet & 0x8000) ? MOTOR_BIT_1 : MOTOR_BIT_0;
 		packet <<= 1;
 	}
 
@@ -167,4 +206,29 @@ static u8 loadDmaBufferDshot(u32 *dmaBuffer, int stride, u16 packet)
 	dmaBuffer[i++ * stride] = 0;
 
 	return DSHOT_DMA_BUFFER_SIZE;
+}
+
+bool isDmaTimerConfigured(TIM_TypeDef *timer)
+{
+	for (u8 i = 0; i < dmaMotorTimerCount; i++)
+	{
+		if (dmaMotorTimers[i].timer == timer)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+motorDmaTimer_t* getDmaTimer(TIM_TypeDef *timer)
+{
+	for (u8 i = 0; i < dmaMotorTimerCount; i++)
+	{
+		if (dmaMotorTimers[i].timer == timer)
+		{
+			return &dmaMotorTimers[i];
+		}
+	}
+	dmaMotorTimers[dmaMotorTimerCount++].timer = timer;
+	return &dmaMotorTimers[dmaMotorTimerCount - 1];
 }

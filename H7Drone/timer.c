@@ -1,6 +1,25 @@
 #include "timer.h"
 #include <stm32h7xx_ll_tim.h>
 
+#ifdef STM32H7
+const timerDef_t timerDefinitions[HARDWARE_TIMER_DEFINITION_COUNT] = {
+	{ .TIMx = TIM1, .rcc = RCC_APB2(TIM1), .inputIrq = TIM1_CC_IRQn },
+	{ .TIMx = TIM2, .rcc = RCC_APB1L(TIM2), .inputIrq = TIM2_IRQn },
+	{ .TIMx = TIM3, .rcc = RCC_APB1L(TIM3), .inputIrq = TIM3_IRQn },
+	{ .TIMx = TIM4, .rcc = RCC_APB1L(TIM4), .inputIrq = TIM4_IRQn },
+	{ .TIMx = TIM5, .rcc = RCC_APB1L(TIM5), .inputIrq = TIM5_IRQn },
+	{ .TIMx = TIM6, .rcc = RCC_APB1L(TIM6), .inputIrq = 0 },
+	{ .TIMx = TIM7, .rcc = RCC_APB1L(TIM7), .inputIrq = 0 },
+	{ .TIMx = TIM8, .rcc = RCC_APB2(TIM8), .inputIrq = TIM8_CC_IRQn },
+	{ .TIMx = TIM12, .rcc = RCC_APB1L(TIM12), .inputIrq = TIM8_BRK_TIM12_IRQn },
+	{ .TIMx = TIM13, .rcc = RCC_APB1L(TIM13), .inputIrq = TIM8_UP_TIM13_IRQn },
+	{ .TIMx = TIM14, .rcc = RCC_APB1L(TIM14), .inputIrq = TIM8_TRG_COM_TIM14_IRQn },
+	{ .TIMx = TIM15, .rcc = RCC_APB2(TIM15), .inputIrq = TIM15_IRQn },
+	{ .TIMx = TIM16, .rcc = RCC_APB2(TIM16), .inputIrq = TIM16_IRQn },
+	{ .TIMx = TIM17, .rcc = RCC_APB2(TIM17), .inputIrq = TIM17_IRQn },
+};
+#endif
+
 rccPeriphTag_t timerRCC(TIM_TypeDef *tim)
 {
 	for (int i = 0; i < HARDWARE_TIMER_DEFINITION_COUNT; i++)
@@ -68,7 +87,7 @@ u16 timerDmaSource(u8 channel)
 	else \
 		LL_TIM_DisableDMAReq_ ## cc(tim);
 
-void timerSetDMAReq(TIM_TypeDef *tim, u8 channel, FunctionalState state)
+void timerSetDMAReqStatus(TIM_TypeDef *tim, u8 channel, FunctionalState state)
 {
 	switch (channel) {
 	case TIM_CHANNEL_1:
@@ -85,22 +104,3 @@ void timerSetDMAReq(TIM_TypeDef *tim, u8 channel, FunctionalState state)
 		break;
 	}
 }
-
-#ifdef STM32H7
-const timerDef_t timerDefinitions[HARDWARE_TIMER_DEFINITION_COUNT] = {
-	{ .TIMx = TIM1, .rcc = RCC_APB2(TIM1), .inputIrq = TIM1_CC_IRQn },
-	{ .TIMx = TIM2, .rcc = RCC_APB1L(TIM2), .inputIrq = TIM2_IRQn },
-	{ .TIMx = TIM3, .rcc = RCC_APB1L(TIM3), .inputIrq = TIM3_IRQn },
-	{ .TIMx = TIM4, .rcc = RCC_APB1L(TIM4), .inputIrq = TIM4_IRQn },
-	{ .TIMx = TIM5, .rcc = RCC_APB1L(TIM5), .inputIrq = TIM5_IRQn },
-	{ .TIMx = TIM6, .rcc = RCC_APB1L(TIM6), .inputIrq = 0 },
-	{ .TIMx = TIM7, .rcc = RCC_APB1L(TIM7), .inputIrq = 0 },
-	{ .TIMx = TIM8, .rcc = RCC_APB2(TIM8), .inputIrq = TIM8_CC_IRQn },
-	{ .TIMx = TIM12, .rcc = RCC_APB1L(TIM12), .inputIrq = TIM8_BRK_TIM12_IRQn },
-	{ .TIMx = TIM13, .rcc = RCC_APB1L(TIM13), .inputIrq = TIM8_UP_TIM13_IRQn },
-	{ .TIMx = TIM14, .rcc = RCC_APB1L(TIM14), .inputIrq = TIM8_TRG_COM_TIM14_IRQn },
-	{ .TIMx = TIM15, .rcc = RCC_APB2(TIM15), .inputIrq = TIM15_IRQn },
-	{ .TIMx = TIM16, .rcc = RCC_APB2(TIM16), .inputIrq = TIM16_IRQn },
-	{ .TIMx = TIM17, .rcc = RCC_APB2(TIM17), .inputIrq = TIM17_IRQn },
-};
-#endif
