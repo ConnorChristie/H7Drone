@@ -990,6 +990,9 @@
     <ClCompile Include="dma.c">
       <Filter>Source files</Filter>
     </ClCompile>
+    <ClCompile Include="memprot.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="flight.h">
@@ -1035,6 +1038,9 @@
       <Filter>Header files</Filter>
     </ClInclude>
     <ClInclude Include="dma.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="memprot.h">
       <Filter>Header files</Filter>
     </ClInclude>
   </ItemGroup>

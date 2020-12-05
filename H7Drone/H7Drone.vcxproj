@@ -80,6 +80,7 @@
     <ClCompile Include="imu.c" />
     <ClCompile Include="main.c" />
     <ClCompile Include="maths.c" />
+    <ClCompile Include="memprot.c" />
     <ClCompile Include="mpu6000.c" />
     <ClCompile Include="mpu9250.c" />
     <ClCompile Include="rcc.c" />
@@ -91,6 +92,7 @@
     <ClCompile Include="timer.c" />
     <ClInclude Include="dma.h" />
     <ClInclude Include="dshot.h" />
+    <ClInclude Include="memprot.h" />
     <ClInclude Include="platform.h" />
     <ClInclude Include="rcc.h" />
     <ClInclude Include="system.h" />

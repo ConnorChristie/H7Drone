@@ -1,10 +1,7 @@
-#include <stm32h7xx_hal.h>
-#include <stm32_hal_legacy.h>
 #include <SysprogsProfiler.h>
-#include <stdlib.h>
-#include <string.h>
 
 #include "system.h"
+#include "memprot.h"
 #include "scheduler.h"
 #include "imu.h"
 #include "dshot.h"
@@ -15,43 +12,82 @@ static void SPI4_Init(void);
 void SystemClock_Config(void);
 void initMotors(void);
 
-#define VECT_TAB_OFFSET  0x00
+#define VECT_TAB_OFFSET 0x00
+
+void run(void);
 
 int main(void)
 {
+	memProtReset();
+
+	initialiseMemorySections();
+
+	// Reset the RCC clock configuration to the default reset state
+	// Set HSION bit
+	RCC->CR = RCC_CR_HSION;
+
+	// Reset CFGR register
+	RCC->CFGR = 0x00000000;
+
+	// Reset HSEON, CSSON , CSION,RC48ON, CSIKERON PLL1ON, PLL2ON and PLL3ON bits
+
+	// XXX Don't do this until we are established with clock handling
+	// RCC->CR &= (uint32_t)0xEAF6ED7F;
+
+	// Instead, we explicitly turn those on
+	RCC->CR |= RCC_CR_CSION;
+	RCC->CR |= RCC_CR_HSION;
+	RCC->CR |= RCC_CR_HSEON;
+	RCC->CR |= RCC_CR_HSI48ON;
+
+	/* Reset D1CFGR register */
+	RCC->D1CFGR = 0x00000000;
+
+	/* Reset D2CFGR register */
+	RCC->D2CFGR = 0x00000000;
+
+	/* Reset D3CFGR register */
+	RCC->D3CFGR = 0x00000000;
+
+	/* Reset PLLCKSELR register */
+	RCC->PLLCKSELR = 0x00000000;
+
+	/* Reset PLLCFGR register */
+	RCC->PLLCFGR = 0x00000000;
+	/* Reset PLL1DIVR register */
+	RCC->PLL1DIVR = 0x00000000;
+	/* Reset PLL1FRACR register */
+	RCC->PLL1FRACR = 0x00000000;
+
+	/* Reset PLL2DIVR register */
+	RCC->PLL2DIVR = 0x00000000;
+
+	/* Reset PLL2FRACR register */
+
+	RCC->PLL2FRACR = 0x00000000;
+	/* Reset PLL3DIVR register */
+	RCC->PLL3DIVR = 0x00000000;
+
+	/* Reset PLL3FRACR register */
+	RCC->PLL3FRACR = 0x00000000;
+
+	/* Reset HSEBYP bit */
+	RCC->CR &= (uint32_t)0xFFFBFFFF;
+
+	/* Disable all interrupts */
+	RCC->CIER = 0x00000000;
+
+	/* Change  the switch matrix read issuing capability to 1 for the AXI SRAM target (Target 7) */
+	*((__IO uint32_t*)0x51008108) = 0x00000001;
+
+	SCB->VTOR = FLASH_BANK1_BASE | VECT_TAB_OFFSET; /* Vector Table Relocation in Internal FLASH */
+	
 	HAL_Init();
 	SystemClock_Config();
 	InitializeInstrumentingProfiler();
 	InitializeSamplingProfiler();
 
-	HAL_MPU_Disable();
-
-	MPU_Region_InitTypeDef MPU_InitStruct;
-	MPU_InitStruct.Enable           = MPU_REGION_ENABLE;
-	MPU_InitStruct.SubRegionDisable = 0x00;
-	MPU_InitStruct.TypeExtField     = MPU_TEX_LEVEL0;
-
-	MPU_InitStruct.Number           = 0;
-	MPU_InitStruct.BaseAddress      = 0x00000000;
-	MPU_InitStruct.Size             = MPU_REGION_SIZE_64KB;
-	MPU_InitStruct.AccessPermission = MPU_REGION_PRIV_RO_URO;
-	MPU_InitStruct.DisableExec      = MPU_INSTRUCTION_ACCESS_ENABLE;
-	MPU_InitStruct.IsShareable      = MPU_ACCESS_NOT_SHAREABLE;
-	MPU_InitStruct.IsCacheable      = MPU_ACCESS_NOT_CACHEABLE;
-	MPU_InitStruct.IsBufferable     = MPU_ACCESS_BUFFERABLE;
-	HAL_MPU_ConfigRegion(&MPU_InitStruct);
-
-	MPU_InitStruct.Number           = 1;
-	MPU_InitStruct.BaseAddress      = 0x30000000;
-	MPU_InitStruct.Size             = 0x0d;
-	MPU_InitStruct.AccessPermission = MPU_REGION_FULL_ACCESS;
-	MPU_InitStruct.DisableExec      = MPU_INSTRUCTION_ACCESS_ENABLE;
-	MPU_InitStruct.IsShareable      = MPU_ACCESS_SHAREABLE;
-	MPU_InitStruct.IsCacheable      = MPU_ACCESS_CACHEABLE;
-	MPU_InitStruct.IsBufferable     = MPU_ACCESS_NOT_BUFFERABLE;
-	HAL_MPU_ConfigRegion(&MPU_InitStruct);
-
-	HAL_MPU_Enable(MPU_PRIVILEGED_DEFAULT);
+	memProtConfigure();
 
 	// Enable CPU L1-Cache
 	SCB_EnableICache();
@@ -89,6 +125,11 @@ int main(void)
 	GPIO_InitStructure.Pull = GPIO_NOPULL;
 	HAL_GPIO_Init(GPIOE, &GPIO_InitStructure);
 
+	run();
+}
+
+void FAST_CODE FAST_CODE_NOINLINE run(void)
+{
 	while (1)
 	{
 		scheduler();

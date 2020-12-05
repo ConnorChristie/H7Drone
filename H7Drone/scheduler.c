@@ -1,8 +1,6 @@
 #include "scheduler.h"
-#include <stm32h7xx_hal.h>
+#include "platform.h"
 
-#include <stdbool.h>
-#include <stdint.h>
 #include <string.h>
 #include <time.h>
 
@@ -238,7 +236,7 @@ inline static timeUs_t getPeriodCalculationBasis(const task_t* task)
 	}
 }
 
-timeUs_t schedulerExecuteTask(task_t *selectedTask, timeUs_t currentTimeUs)
+FAST_CODE timeUs_t schedulerExecuteTask(task_t *selectedTask, timeUs_t currentTimeUs)
 {
 	timeUs_t taskExecutionTimeUs = 0;
 
@@ -276,7 +274,7 @@ timeUs_t schedulerExecuteTask(task_t *selectedTask, timeUs_t currentTimeUs)
 	return taskExecutionTimeUs;
 }
 
-void scheduler(void)
+FAST_CODE void scheduler(void)
 {
 	// Cache currentTime
 	const timeUs_t schedulerStartTimeUs = micros();

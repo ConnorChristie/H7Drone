@@ -2,7 +2,7 @@
 #include "timer.h"
 #include "dma.h"
 
-__attribute__((section(".DMA_RAM"))) u32 dshotOutputBuffer[4][DSHOT_DMA_BUFFER_SIZE];
+DMA_RAM u32 dshotOutputBuffer[4][DSHOT_DMA_BUFFER_SIZE];
 
 motorInstance_t motors[4];
 

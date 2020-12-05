@@ -1,4 +1,4 @@
-#include <stm32h7xx_hal.h>
+#include "platform.h"
 #include "system.h"
 
 // cycles per microsecond
