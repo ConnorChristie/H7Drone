@@ -81,26 +81,14 @@ u16 timerDmaSource(u8 channel)
 	return 0;
 }
 
-#define LL_TIM_IT(tim, cc, state) \
-	if (state == ENABLE) \
-		LL_TIM_EnableDMAReq_ ## cc(tim); \
-	else \
-		LL_TIM_DisableDMAReq_ ## cc(tim);
-
-void timerSetDMAReqStatus(TIM_TypeDef *tim, u8 channel, FunctionalState state)
+void timerSetDMAReqStatus(TIM_TypeDef *tim, u16 sources, FunctionalState state)
 {
-	switch (channel) {
-	case TIM_CHANNEL_1:
-		LL_TIM_IT(tim, CC1, state);
-		break;
-	case TIM_CHANNEL_2:
-		LL_TIM_IT(tim, CC2, state);
-		break;
-	case TIM_CHANNEL_3:
-		LL_TIM_IT(tim, CC3, state);
-		break;
-	case TIM_CHANNEL_4:
-		LL_TIM_IT(tim, CC4, state);
-		break;
+	if (state == ENABLE)
+	{
+		SET_BIT(tim->DIER, sources);
+	}
+	else
+	{
+		CLEAR_BIT(tim->DIER, sources);
 	}
 }

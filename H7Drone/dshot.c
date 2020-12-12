@@ -1,10 +1,14 @@
 #include "dshot.h"
 #include "timer.h"
 #include "dma.h"
+#include "system.h"
 
-DMA_RAM u32 dshotOutputBuffer[4][DSHOT_DMA_BUFFER_SIZE];
+#define MAX_SUPPORTED_MOTORS 4
 
-motorInstance_t motors[4];
+DMA_RAM u32 dshotOutputBuffer[MAX_SUPPORTED_MOTORS][DSHOT_DMA_BUFFER_SIZE];
+
+FAST_DATA_ZERO_INIT u16 motorValues[MAX_SUPPORTED_MOTORS];
+ motorInstance_t motors[MAX_SUPPORTED_MOTORS];
 
 u16 prepareDshotPacket(u16 value);
 static u8 loadDmaBufferDshot(u32 *dmaBuffer, int stride, u16 packet);
@@ -12,28 +16,28 @@ static u8 loadDmaBufferDshot(u32 *dmaBuffer, int stride, u16 packet);
 static u16 cnt = 0;
 timeUs_t lastTime = 0;
 
-u8 dmaMotorTimerCount = 0;
-motorDmaTimer_t dmaMotorTimers[4];
+FAST_DATA_ZERO_INIT u8 dmaMotorTimerCount = 0;
+FAST_DATA_ZERO_INIT motorDmaTimer_t dmaMotorTimers[MAX_SUPPORTED_MOTORS];
 
 bool isDmaTimerConfigured(TIM_TypeDef *timer);
 motorDmaTimer_t* getDmaTimer(TIM_TypeDef *timer);
 
-void dshotWrite(timeUs_t currentTimeUs)
+FAST_CODE void dshotWriteInt(u8 id, u16 value)
 {
-	for (u8 i = 0; i < 4; i++)
-	{
-		const motorInstance_t *motor = &motors[i];
-		dmaChannelDescriptor_t *dma = dmaGetDescriptorByIdentifier(motor->dma);
+	const motorInstance_t *motor = &motors[id];
+	const dmaChannelDescriptor_t *dma = dmaGetDescriptorByIdentifier(motor->dma);
 
-		u16 packet = prepareDshotPacket(cnt);
-		u8 bufferSize = loadDmaBufferDshot((u32 *)&dshotOutputBuffer[i][0], 1, packet);
+	u16 packet = prepareDshotPacket(cnt);
+	u8 bufferSize = loadDmaBufferDshot((u32 *)&dshotOutputBuffer[id][0], 1, packet);
 
-		LL_DMA_SetDataLength(dma->instance.dma, dma->instance.stream, bufferSize);
-		LL_DMA_EnableStream(dma->instance.dma, dma->instance.stream);
+	LL_DMA_SetDataLength(dma->instance.dma, dma->instance.stream, bufferSize);
+	LL_DMA_EnableStream(dma->instance.dma, dma->instance.stream);
 
-		motor->dmaTimer->timerDmaSources |= motor->timerDmaSource;
-	}
+	motor->dmaTimer->timerDmaSources |= motor->timerDmaSource;
+}
 
+FAST_CODE void dshotUpdateComplete()
+{
 	for (u8 i = 0; i < dmaMotorTimerCount; i++)
 	{
 		const motorDmaTimer_t *dmaTimer = &dmaMotorTimers[i];
@@ -42,9 +46,28 @@ void dshotWrite(timeUs_t currentTimeUs)
 		dmaTimer->timer->ARR = dmaTimer->outputPeriod;
 
 		LL_TIM_SetCounter(dmaTimer->timer, 0);
-
-		SET_BIT(dmaTimer->timer->DIER, dmaTimer->timerDmaSources);
+		timerSetDMAReqStatus(dmaTimer->timer, dmaTimer->timerDmaSources, ENABLE);
 	}
+}
+
+FAST_CODE void dshotWriteAllMotors(u16 *values)
+{
+	for (u8 i = 0; i < MAX_SUPPORTED_MOTORS; i++)
+	{
+		dshotWriteInt(i, values[i]);
+	}
+
+	dshotUpdateComplete();
+}
+
+FAST_CODE void writeMotors(timeUs_t currentTimeUs)
+{
+	motorValues[0] = cnt;
+	motorValues[1] = 200 - cnt;
+	motorValues[2] = cnt;
+	motorValues[3] = 200 - cnt;
+	
+	dshotWriteAllMotors(motorValues);
 
 	timeDelta_t delta = currentTimeUs - lastTime;
 
@@ -52,10 +75,16 @@ void dshotWrite(timeUs_t currentTimeUs)
 	{
 		lastTime = currentTimeUs;
 		cnt++;
-		if (cnt > 200) {
+		if (cnt >= 200) {
 			cnt = 0;
 		}
 	}
+}
+
+void stopMotors(void)
+{
+	dshotWriteAllMotors(0);
+	delay(50);  // give the timers and ESCs a chance to react.
 }
 
 static void motor_DMA_IRQHandler(dmaChannelDescriptor_t* descriptor)
@@ -65,7 +94,7 @@ static void motor_DMA_IRQHandler(dmaChannelDescriptor_t* descriptor)
 		LL_DMA_DisableStream(descriptor->instance.dma, descriptor->instance.stream);
 
 		const motorInstance_t *motor = &motors[descriptor->userParam];
-		timerSetDMAReqStatus(motor->timer.instance, motor->timer.channel, DISABLE);
+		timerSetDMAReqStatus(motor->timer.instance, motor->timerDmaSource, DISABLE);
 
 		motor->dmaTimer->timerDmaSources &= ~motor->timerDmaSource;
 

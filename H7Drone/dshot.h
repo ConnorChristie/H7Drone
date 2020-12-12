@@ -40,4 +40,4 @@ typedef struct
 } motorInstance_t;
 
 void dshotInit(u8 id, motorInstance_t motor);
-void dshotWrite(timeUs_t currentTimeUs);
+void writeMotors(timeUs_t currentTimeUs);
