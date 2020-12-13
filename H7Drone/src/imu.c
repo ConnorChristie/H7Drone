@@ -1,8 +1,8 @@
 #include "imu.h"
 #include "system.h"
-#include "mpu6000.h"
-#include "icm20602.h"
 #include "flight.h"
+#include "drivers/mpu6000.h"
+#include "drivers/icm20602.h"
 
 #include <string.h>
 #include <stdlib.h>

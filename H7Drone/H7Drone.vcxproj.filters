@@ -46,17 +46,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Makefile" />
-    <None Include="startup_stm32h743xx.s">
-      <Filter>Source files\Device-specific files</Filter>
-    </None>
     <None Include="STM32H743VI_flash.lds">
       <Filter>Source files</Filter>
     </None>
+    <None Include="src\startup_stm32h743xx.s" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="system_stm32h7xx.c">
-      <Filter>Source files</Filter>
-    </ClCompile>
     <None Include="stm32.mak">
       <Filter>Source files\Device-specific files</Filter>
     </None>
@@ -909,39 +904,6 @@
     <None Include="stm32.xml">
       <Filter>VisualGDB settings</Filter>
     </None>
-    <ClCompile Include="flight.c">
-      <Filter>Source files</Filter>
-    </ClCompile>
-    <ClCompile Include="icm20602.c">
-      <Filter>Source files</Filter>
-    </ClCompile>
-    <ClCompile Include="imu.c">
-      <Filter>Source files</Filter>
-    </ClCompile>
-    <ClCompile Include="main.c">
-      <Filter>Source files</Filter>
-    </ClCompile>
-    <ClCompile Include="maths.c">
-      <Filter>Source files</Filter>
-    </ClCompile>
-    <ClCompile Include="mpu6000.c">
-      <Filter>Source files</Filter>
-    </ClCompile>
-    <ClCompile Include="mpu9250.c">
-      <Filter>Source files</Filter>
-    </ClCompile>
-    <ClCompile Include="scheduler.c">
-      <Filter>Source files</Filter>
-    </ClCompile>
-    <ClCompile Include="spi.c">
-      <Filter>Source files</Filter>
-    </ClCompile>
-    <ClCompile Include="system.c">
-      <Filter>Source files</Filter>
-    </ClCompile>
-    <ClCompile Include="tasks.c">
-      <Filter>Source files</Filter>
-    </ClCompile>
     <ClCompile Include="$(EFP_BASE)\Profiler\FastSemihosting.cpp">
       <Filter>Source files\Device-specific files\Semihosting/Profiler</Filter>
     </ClCompile>
@@ -978,70 +940,111 @@
     <ClInclude Include="$(EFP_BASE)\Profiler\DebuggerChecker.h">
       <Filter>Header files\Device-specific files\Semihosting/Profiler</Filter>
     </ClInclude>
-    <ClCompile Include="dshot.c">
-      <Filter>Source files</Filter>
-    </ClCompile>
-    <ClCompile Include="timer.c">
-      <Filter>Source files</Filter>
-    </ClCompile>
-    <ClCompile Include="rcc.c">
-      <Filter>Source files</Filter>
-    </ClCompile>
-    <ClCompile Include="dma.c">
-      <Filter>Source files</Filter>
-    </ClCompile>
-    <ClCompile Include="memprot.c">
-      <Filter>Source files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="flight.h">
+    <ClInclude Include="src\accgyro_mpu.h">
       <Filter>Header files</Filter>
     </ClInclude>
-    <ClInclude Include="icm20602.h">
+    <ClInclude Include="src\dma.h">
       <Filter>Header files</Filter>
     </ClInclude>
-    <ClInclude Include="imu.h">
+    <ClInclude Include="src\flight.h">
       <Filter>Header files</Filter>
     </ClInclude>
-    <ClInclude Include="maths.h">
+    <ClInclude Include="src\imu.h">
       <Filter>Header files</Filter>
     </ClInclude>
-    <ClInclude Include="mpu6000.h">
+    <ClInclude Include="src\maths.h">
       <Filter>Header files</Filter>
     </ClInclude>
-    <ClInclude Include="mpu9250.h">
+    <ClInclude Include="src\memprot.h">
       <Filter>Header files</Filter>
     </ClInclude>
-    <ClInclude Include="scheduler.h">
+    <ClInclude Include="src\platform.h">
       <Filter>Header files</Filter>
     </ClInclude>
-    <ClInclude Include="spi.h">
+    <ClInclude Include="src\rcc.h">
       <Filter>Header files</Filter>
     </ClInclude>
-    <ClInclude Include="system.h">
+    <ClInclude Include="src\scheduler.h">
       <Filter>Header files</Filter>
     </ClInclude>
-    <ClInclude Include="tasks.h">
+    <ClInclude Include="src\spi.h">
       <Filter>Header files</Filter>
     </ClInclude>
-    <ClInclude Include="dshot.h">
+    <ClInclude Include="src\system.h">
       <Filter>Header files</Filter>
     </ClInclude>
-    <ClInclude Include="platform.h">
+    <ClInclude Include="src\tasks.h">
       <Filter>Header files</Filter>
     </ClInclude>
-    <ClInclude Include="timer.h">
+    <ClInclude Include="src\timer.h">
       <Filter>Header files</Filter>
     </ClInclude>
-    <ClInclude Include="rcc.h">
+    <ClInclude Include="src\motors\dshot.h">
       <Filter>Header files</Filter>
     </ClInclude>
-    <ClInclude Include="dma.h">
+    <ClInclude Include="src\drivers\icm20602.h">
       <Filter>Header files</Filter>
     </ClInclude>
-    <ClInclude Include="memprot.h">
+    <ClInclude Include="src\drivers\mpu6000.h">
       <Filter>Header files</Filter>
     </ClInclude>
+    <ClInclude Include="src\drivers\mpu9250.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\dma.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\flight.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\imu.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\main.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\maths.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\memprot.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\rcc.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\scheduler.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\spi.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\system.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\system_stm32h7xx.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tasks.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\timer.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\motors\dshot.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\drivers\icm20602.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\drivers\mpu6000.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\drivers\mpu9250.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

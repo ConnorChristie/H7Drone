@@ -4,8 +4,8 @@
 #include "memprot.h"
 #include "scheduler.h"
 #include "imu.h"
-#include "dshot.h"
 #include "dma.h"
+#include "motors/dshot.h"
 
 static void SPI1_Init(void);
 static void SPI4_Init(void);

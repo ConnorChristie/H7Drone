@@ -47,7 +47,7 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <NMakeIncludeSearchPath>.;$(BSP_ROOT)\STM32H7xxxx\STM32H7xx_HAL_Driver\Inc;$(BSP_ROOT)\STM32H7xxxx\STM32H7xx_HAL_Driver\Inc\Legacy;$(BSP_ROOT)\STM32H7xxxx\CMSIS_HAL\Core\Include;$(BSP_ROOT)\STM32H7xxxx\CMSIS_HAL\Device\ST\STM32H7xx\Include;$(BSP_ROOT)\STM32H7xxxx\CMSIS_HAL\Include;$(BSP_ROOT)\STM32H7xxxx\CMSIS_HAL\RTOS2\Include;$(EFP_BASE)\Profiler;$(TOOLCHAIN_ROOT)\arm-none-eabi\include\c++\9.3.1;$(TOOLCHAIN_ROOT)\arm-none-eabi\include\c++\9.3.1\arm-none-eabi\thumb\v7e-m+dp\hard;$(TOOLCHAIN_ROOT)\arm-none-eabi\include\c++\9.3.1\backward;$(TOOLCHAIN_ROOT)\lib\gcc\arm-none-eabi\9.3.1\include;$(TOOLCHAIN_ROOT)\lib\gcc\arm-none-eabi\9.3.1\include-fixed;$(TOOLCHAIN_ROOT)\arm-none-eabi\include;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
+    <NMakeIncludeSearchPath>.;$(BSP_ROOT)\STM32H7xxxx\STM32H7xx_HAL_Driver\Inc;$(BSP_ROOT)\STM32H7xxxx\STM32H7xx_HAL_Driver\Inc\Legacy;$(BSP_ROOT)\STM32H7xxxx\CMSIS_HAL\Core\Include;$(BSP_ROOT)\STM32H7xxxx\CMSIS_HAL\Device\ST\STM32H7xx\Include;$(BSP_ROOT)\STM32H7xxxx\CMSIS_HAL\Include;$(BSP_ROOT)\STM32H7xxxx\CMSIS_HAL\RTOS2\Include;$(EFP_BASE)\Profiler;$(TOOLCHAIN_ROOT)\arm-none-eabi\include\c++\9.3.1;$(TOOLCHAIN_ROOT)\arm-none-eabi\include\c++\9.3.1\arm-none-eabi\thumb\v7e-m+dp\hard;$(TOOLCHAIN_ROOT)\arm-none-eabi\include\c++\9.3.1\backward;$(TOOLCHAIN_ROOT)\lib\gcc\arm-none-eabi\9.3.1\include;$(TOOLCHAIN_ROOT)\lib\gcc\arm-none-eabi\9.3.1\include-fixed;$(TOOLCHAIN_ROOT)\arm-none-eabi\include;src;src\motors;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
     <NMakeForcedIncludes>$(ProjectDir)\gcc_Debug.h;$(VISUALGDB_DIR)\gcc_compat.h;$(BSP_ROOT)\stm32_compat.h;$(NMakeForcedIncludes)</NMakeForcedIncludes>
     <NMakeBuildCommandLine>"$(VISUALGDB_DIR)\VisualGDB.exe" /build "$(ProjectPath)" "/solution:$(SolutionPath)"  "/config:$(Configuration)" "/platform:$(Platform)"</NMakeBuildCommandLine>
     <NMakeCleanCommandLine>"$(VISUALGDB_DIR)\VisualGDB.exe" /clean "$(ProjectPath)" "/solution:$(SolutionPath)"  "/config:$(Configuration)" "/platform:$(Platform)"</NMakeCleanCommandLine>
@@ -73,32 +73,24 @@
   </ImportGroup>
   <ItemGroup />
   <ItemGroup>
-    <ClCompile Include="dma.c" />
-    <ClCompile Include="dshot.c" />
-    <ClCompile Include="flight.c" />
-    <ClCompile Include="icm20602.c" />
-    <ClCompile Include="imu.c" />
-    <ClCompile Include="main.c" />
-    <ClCompile Include="maths.c" />
-    <ClCompile Include="memprot.c" />
-    <ClCompile Include="mpu6000.c" />
-    <ClCompile Include="mpu9250.c" />
-    <ClCompile Include="rcc.c" />
-    <ClCompile Include="scheduler.c" />
-    <ClCompile Include="spi.c" />
-    <ClCompile Include="system.c" />
-    <ClCompile Include="system_stm32h7xx.c" />
-    <ClCompile Include="tasks.c" />
-    <ClCompile Include="timer.c" />
-    <ClInclude Include="dma.h" />
-    <ClInclude Include="dshot.h" />
-    <ClInclude Include="memprot.h" />
-    <ClInclude Include="platform.h" />
-    <ClInclude Include="rcc.h" />
-    <ClInclude Include="system.h" />
-    <ClInclude Include="tasks.h" />
-    <ClInclude Include="timer.h" />
-    <None Include="startup_stm32h743xx.s" />
+    <ClCompile Include="src\dma.c" />
+    <ClCompile Include="src\drivers\icm20602.c" />
+    <ClCompile Include="src\drivers\mpu6000.c" />
+    <ClCompile Include="src\drivers\mpu9250.c" />
+    <ClCompile Include="src\flight.c" />
+    <ClCompile Include="src\imu.c" />
+    <ClCompile Include="src\main.c" />
+    <ClCompile Include="src\maths.c" />
+    <ClCompile Include="src\memprot.c" />
+    <ClCompile Include="src\motors\dshot.c" />
+    <ClCompile Include="src\rcc.c" />
+    <ClCompile Include="src\scheduler.c" />
+    <ClCompile Include="src\spi.c" />
+    <ClCompile Include="src\system.c" />
+    <ClCompile Include="src\system_stm32h7xx.c" />
+    <ClCompile Include="src\tasks.c" />
+    <ClCompile Include="src\timer.c" />
+    <None Include="src\startup_stm32h743xx.s" />
     <None Include="stm32.mak" />
     <ClCompile Include="$(BSP_ROOT)\STM32H7xxxx\STM32H7xx_HAL_Driver\Src\stm32h7xx_hal.c" />
     <ClCompile Include="$(BSP_ROOT)\STM32H7xxxx\STM32H7xx_HAL_Driver\Src\stm32h7xx_hal_adc.c" />
@@ -219,14 +211,23 @@
     <ClCompile Include="$(BSP_ROOT)\STM32H7xxxx\STM32H7xx_HAL_Driver\Src\stm32h7xx_ll_tim.c" />
     <ClCompile Include="$(BSP_ROOT)\STM32H7xxxx\STM32H7xx_HAL_Driver\Src\stm32h7xx_ll_usart.c" />
     <ClCompile Include="$(BSP_ROOT)\STM32H7xxxx\STM32H7xx_HAL_Driver\Src\stm32h7xx_ll_utils.c" />
-    <ClInclude Include="flight.h" />
-    <ClInclude Include="icm20602.h" />
-    <ClInclude Include="imu.h" />
-    <ClInclude Include="maths.h" />
-    <ClInclude Include="mpu6000.h" />
-    <ClInclude Include="mpu9250.h" />
-    <ClInclude Include="scheduler.h" />
-    <ClInclude Include="spi.h" />
+    <ClInclude Include="src\accgyro_mpu.h" />
+    <ClInclude Include="src\dma.h" />
+    <ClInclude Include="src\drivers\icm20602.h" />
+    <ClInclude Include="src\drivers\mpu6000.h" />
+    <ClInclude Include="src\drivers\mpu9250.h" />
+    <ClInclude Include="src\flight.h" />
+    <ClInclude Include="src\imu.h" />
+    <ClInclude Include="src\maths.h" />
+    <ClInclude Include="src\memprot.h" />
+    <ClInclude Include="src\motors\dshot.h" />
+    <ClInclude Include="src\platform.h" />
+    <ClInclude Include="src\rcc.h" />
+    <ClInclude Include="src\scheduler.h" />
+    <ClInclude Include="src\spi.h" />
+    <ClInclude Include="src\system.h" />
+    <ClInclude Include="src\tasks.h" />
+    <ClInclude Include="src\timer.h" />
     <ClInclude Include="stm32h7xx_hal_conf.h" />
     <ClInclude Include="$(BSP_ROOT)\STM32H7xxxx\STM32H7xx_HAL_Driver\Inc\stm32h7xx_hal.h" />
     <ClInclude Include="$(BSP_ROOT)\STM32H7xxxx\STM32H7xx_HAL_Driver\Inc\stm32h7xx_hal_adc.h" />

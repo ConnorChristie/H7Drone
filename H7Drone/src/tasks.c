@@ -1,7 +1,7 @@
 #include "tasks.h"
 #include "imu.h"
 #include "flight.h"
-#include "dshot.h"
+#include "motors/dshot.h"
 
 #include <stm32h7xx_hal.h>
 #include <stdio.h>
