@@ -993,6 +993,9 @@
     <ClInclude Include="src\drivers\mpu9250.h">
       <Filter>Header files</Filter>
     </ClInclude>
+    <ClInclude Include="sbus.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\dma.c">
@@ -1044,6 +1047,9 @@
       <Filter>Source files</Filter>
     </ClCompile>
     <ClCompile Include="src\drivers\mpu9250.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="sbus.c">
       <Filter>Source files</Filter>
     </ClCompile>
   </ItemGroup>

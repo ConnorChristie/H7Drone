@@ -1,5 +1,6 @@
 #pragma once
 
+#include "platform.h"
 #include <stdint.h>
 #include <cmsis_compiler.h>
 
@@ -11,7 +12,7 @@ typedef struct
 	void *data;
 } interruptContext_t;
 
-void enableInterrupt(uint8_t group, interruptFuncPtr fn, void *ctx);
+void enableInterrupt(u8 group, interruptFuncPtr fn, void *ctx);
 
 #if defined(STM32F3) || defined(STM32F4) || defined(STM32F7) || defined(STM32H7)
 // See "RM CoreSight Architecture Specification"
@@ -27,38 +28,38 @@ void enableInterrupt(uint8_t group, interruptFuncPtr fn, void *ctx);
 // missing versions are implemented here
 
 // set BASEPRI register, do not create memory barrier
-__attribute__((always_inline)) static inline void __set_BASEPRI_nb(uint32_t basePri)
+__attribute__((always_inline)) static inline void __set_BASEPRI_nb(u32 basePri)
 {
 	__ASM volatile("\tMSR basepri, %0\n" : : "r" (basePri));
 }
 
 // set BASEPRI_MAX register, do not create memory barrier
-__attribute__((always_inline)) static inline void __set_BASEPRI_MAX_nb(uint32_t basePri)
+__attribute__((always_inline)) static inline void __set_BASEPRI_MAX_nb(u32 basePri)
 {
 	__ASM volatile("\tMSR basepri_max, %0\n" : : "r" (basePri));
 }
 
 // restore BASEPRI (called as cleanup function), with global memory barrier
-static inline void __basepriRestoreMem(uint8_t *val)
+static inline void __basepriRestoreMem(u8 *val)
 {
 	__set_BASEPRI(*val);
 }
 
 // set BASEPRI_MAX, with global memory barrier, returns true
-static inline uint8_t __basepriSetMemRetVal(uint8_t prio)
+static inline u8 __basepriSetMemRetVal(u8 prio)
 {
 	__set_BASEPRI_MAX(prio);
 	return 1;
 }
 
 // restore BASEPRI (called as cleanup function), no memory barrier
-static inline void __basepriRestore(uint8_t *val)
+static inline void __basepriRestore(u8 *val)
 {
 	__set_BASEPRI_nb(*val);
 }
 
 // set BASEPRI_MAX, no memory barrier, returns true
-static inline uint8_t __basepriSetRetVal(uint8_t prio)
+static inline u8 __basepriSetRetVal(u8 prio)
 {
 	__set_BASEPRI_MAX_nb(prio);
 	return 1;
@@ -68,7 +69,7 @@ static inline uint8_t __basepriSetRetVal(uint8_t prio)
 // All exit paths are handled. Implemented as for loop, does intercept break and continue
 // Full memory barrier is placed at start and at exit of block
 // __unused__ attribute is used to supress CLang warning
-#define ATOMIC_BLOCK(prio) for ( uint8_t __basepri_save __attribute__ ((__cleanup__ (__basepriRestoreMem), __unused__)) = __get_BASEPRI(), \
+#define ATOMIC_BLOCK(prio) for ( u8 __basepri_save __attribute__ ((__cleanup__ (__basepriRestoreMem), __unused__)) = __get_BASEPRI(), \
                                      __ToDo = __basepriSetMemRetVal(prio); __ToDo ; __ToDo = 0 )
 
 #define NVIC_PRIORITY_GROUPING NVIC_PRIORITYGROUP_2
@@ -79,9 +80,10 @@ static inline uint8_t __basepriSetRetVal(uint8_t prio)
 
 void SysTick_Handler(void);
 void cycleCounterInit(void);
-uint32_t micros(void);
-void delayMicroseconds(uint32_t us);
-void delay(uint32_t ms);
+u32 micros(void);
+u32 microsISR(void);
+void delayMicroseconds(u32 us);
+void delay(u32 ms);
 
 // IO
-int GPIOPinIdx(uint16_t pin);
+int GPIOPinIdx(u16 pin);
