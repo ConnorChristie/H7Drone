@@ -43,6 +43,36 @@
     <Filter Include="Header files\Device-specific files\Semihosting/Profiler">
       <UniqueIdentifier>{b43a0691-4b95-4733-b718-26506bd2ded3}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header files\rx">
+      <UniqueIdentifier>{ea72725d-be3d-4f4c-bee2-316ed231e304}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\motors">
+      <UniqueIdentifier>{8c4bd977-2cc1-471a-b982-affbdb5e89be}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\flight">
+      <UniqueIdentifier>{5f8f6a90-bac6-48d1-bf5f-ad503dbb0bb5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\drivers">
+      <UniqueIdentifier>{6576daac-49d2-4bca-863f-0f43d067d646}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\rx">
+      <UniqueIdentifier>{b7200c55-540c-48e6-bb2f-5722c59fb7ec}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\drivers">
+      <UniqueIdentifier>{33ae9391-90db-4f92-ad36-4e5ab41766ed}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\motors">
+      <UniqueIdentifier>{36a900c6-83ed-4fc9-8469-ccb867bda957}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\flight">
+      <UniqueIdentifier>{65cff7ce-1312-4152-bfe3-383a6c0a83e3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\core">
+      <UniqueIdentifier>{fb9ebf90-0a4d-4c95-95b3-39901f0dfd8a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\core">
+      <UniqueIdentifier>{c28ff200-f979-44dd-97f2-40bb0c4178f6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="Makefile" />
@@ -412,9 +442,6 @@
     <ClCompile Include="$(BSP_ROOT)\STM32H7xxxx\STM32H7xx_HAL_Driver\Src\stm32h7xx_ll_utils.c">
       <Filter>Source files\Device-specific files\LL</Filter>
     </ClCompile>
-    <ClInclude Include="stm32h7xx_hal_conf.h">
-      <Filter>Header files</Filter>
-    </ClInclude>
     <ClInclude Include="$(BSP_ROOT)\STM32H7xxxx\STM32H7xx_HAL_Driver\Inc\stm32h7xx_hal.h">
       <Filter>Header files\Device-specific files\HAL</Filter>
     </ClInclude>
@@ -942,115 +969,124 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\accgyro_mpu.h">
-      <Filter>Header files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\dma.h">
-      <Filter>Header files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\flight.h">
-      <Filter>Header files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\imu.h">
-      <Filter>Header files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\maths.h">
-      <Filter>Header files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\memprot.h">
-      <Filter>Header files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\platform.h">
-      <Filter>Header files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\rcc.h">
-      <Filter>Header files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\scheduler.h">
-      <Filter>Header files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\spi.h">
-      <Filter>Header files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\system.h">
-      <Filter>Header files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\tasks.h">
-      <Filter>Header files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\timer.h">
-      <Filter>Header files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\motors\dshot.h">
-      <Filter>Header files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\drivers\icm20602.h">
-      <Filter>Header files</Filter>
+    <ClInclude Include="src\drivers\mpu9250.h">
+      <Filter>Header files\drivers</Filter>
     </ClInclude>
     <ClInclude Include="src\drivers\mpu6000.h">
-      <Filter>Header files</Filter>
+      <Filter>Header files\drivers</Filter>
     </ClInclude>
-    <ClInclude Include="src\drivers\mpu9250.h">
-      <Filter>Header files</Filter>
+    <ClInclude Include="src\drivers\icm20602.h">
+      <Filter>Header files\drivers</Filter>
     </ClInclude>
     <ClInclude Include="sbus.h">
-      <Filter>Header files</Filter>
+      <Filter>Header files\rx</Filter>
+    </ClInclude>
+    <ClInclude Include="src\motors\dshot.h">
+      <Filter>Header files\motors</Filter>
+    </ClInclude>
+    <ClInclude Include="src\flight.h">
+      <Filter>Header files\flight</Filter>
+    </ClInclude>
+    <ClInclude Include="src\imu.h">
+      <Filter>Header files\flight</Filter>
+    </ClInclude>
+    <ClInclude Include="src\tasks.h">
+      <Filter>Header files\flight</Filter>
+    </ClInclude>
+    <ClInclude Include="src\timer.h">
+      <Filter>Header files\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\system.h">
+      <Filter>Header files\core</Filter>
+    </ClInclude>
+    <ClInclude Include="stm32h7xx_hal_conf.h">
+      <Filter>Header files\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\scheduler.h">
+      <Filter>Header files\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\rcc.h">
+      <Filter>Header files\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\platform.h">
+      <Filter>Header files\core</Filter>
+    </ClInclude>
+    <ClInclude Include="nvic.h">
+      <Filter>Header files\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\memprot.h">
+      <Filter>Header files\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\maths.h">
+      <Filter>Header files\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\dma.h">
+      <Filter>Header files\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\spi.h">
+      <Filter>Header files\core</Filter>
+    </ClInclude>
+    <ClInclude Include="serial_uart.h">
+      <Filter>Header files\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\accgyro_mpu.h">
+      <Filter>Header files\drivers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\dma.c">
-      <Filter>Source files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\flight.c">
-      <Filter>Source files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\imu.c">
-      <Filter>Source files</Filter>
-    </ClCompile>
     <ClCompile Include="src\main.c">
       <Filter>Source files</Filter>
     </ClCompile>
-    <ClCompile Include="src\maths.c">
-      <Filter>Source files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\memprot.c">
-      <Filter>Source files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\rcc.c">
-      <Filter>Source files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\scheduler.c">
-      <Filter>Source files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\spi.c">
-      <Filter>Source files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\system.c">
-      <Filter>Source files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\system_stm32h7xx.c">
-      <Filter>Source files</Filter>
+    <ClCompile Include="src\flight.c">
+      <Filter>Source files\flight</Filter>
     </ClCompile>
     <ClCompile Include="src\tasks.c">
-      <Filter>Source files</Filter>
+      <Filter>Source files\flight</Filter>
     </ClCompile>
-    <ClCompile Include="src\timer.c">
-      <Filter>Source files</Filter>
+    <ClCompile Include="src\imu.c">
+      <Filter>Source files\flight</Filter>
     </ClCompile>
     <ClCompile Include="src\motors\dshot.c">
-      <Filter>Source files</Filter>
+      <Filter>Source files\motors</Filter>
     </ClCompile>
     <ClCompile Include="src\drivers\icm20602.c">
-      <Filter>Source files</Filter>
+      <Filter>Source files\drivers</Filter>
     </ClCompile>
     <ClCompile Include="src\drivers\mpu6000.c">
-      <Filter>Source files</Filter>
+      <Filter>Source files\drivers</Filter>
     </ClCompile>
     <ClCompile Include="src\drivers\mpu9250.c">
-      <Filter>Source files</Filter>
+      <Filter>Source files\drivers</Filter>
     </ClCompile>
     <ClCompile Include="sbus.c">
-      <Filter>Source files</Filter>
+      <Filter>Source files\rx</Filter>
+    </ClCompile>
+    <ClCompile Include="src\maths.c">
+      <Filter>Source files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\memprot.c">
+      <Filter>Source files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\rcc.c">
+      <Filter>Source files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\scheduler.c">
+      <Filter>Source files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\system.c">
+      <Filter>Source files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\system_stm32h7xx.c">
+      <Filter>Source files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\timer.c">
+      <Filter>Source files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\dma.c">
+      <Filter>Source files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\spi.c">
+      <Filter>Source files\core</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

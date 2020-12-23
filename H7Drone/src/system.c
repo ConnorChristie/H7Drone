@@ -1,5 +1,6 @@
 #include "platform.h"
 #include "system.h"
+#include "nvic.h"
 
 // cycles per microsecond
 static uint32_t usTicks = 0;

@@ -72,10 +72,6 @@ static inline u8 __basepriSetRetVal(u8 prio)
 #define ATOMIC_BLOCK(prio) for ( u8 __basepri_save __attribute__ ((__cleanup__ (__basepriRestoreMem), __unused__)) = __get_BASEPRI(), \
                                      __ToDo = __basepriSetMemRetVal(prio); __ToDo ; __ToDo = 0 )
 
-#define NVIC_PRIORITY_GROUPING NVIC_PRIORITYGROUP_2
-#define NVIC_BUILD_PRIORITY(base,sub) (((((base)<<(4-(7-(NVIC_PRIORITY_GROUPING))))|((sub)&(0x0f>>(7-(NVIC_PRIORITY_GROUPING)))))<<4)&0xf0)
-#define NVIC_PRIO_MAX NVIC_BUILD_PRIORITY(0, 1)
-
 #define DISCARD(x) (void)x
 
 void SysTick_Handler(void);

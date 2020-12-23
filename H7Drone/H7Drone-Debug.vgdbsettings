@@ -101,7 +101,7 @@
     <DebugMethod>
       <ID>com.sysprogs.arm.openocd</ID>
       <InterfaceID>stlink-v2</InterfaceID>
-      <InterfaceSerialNumber>6&amp;1B31A47C&amp;0&amp;2</InterfaceSerialNumber>
+      <InterfaceSerialNumber>7&amp;4277AC2&amp;0&amp;1</InterfaceSerialNumber>
       <Configuration xsi:type="com.visualgdb.edp.openocd.settings">
         <CommandLine>-f interface/stlink-v2.cfg -f target/stm32h7x_dual_bank.cfg -c init -c "reset init"</CommandLine>
         <ExtraParameters>

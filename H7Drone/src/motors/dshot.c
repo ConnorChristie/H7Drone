@@ -1,7 +1,8 @@
 #include "dshot.h"
+#include "system.h"
 #include "timer.h"
 #include "dma.h"
-#include "system.h"
+#include "nvic.h"
 
 #define MAX_SUPPORTED_MOTORS 4
 
@@ -168,7 +169,7 @@ void dshotInit(u8 id, motorInstance_t motor)
 		DMA_InitStructure.Mode = LL_DMA_MODE_NORMAL;
 		DMA_InitStructure.Priority = LL_DMA_PRIORITY_HIGH;
 
-		dmaSetHandler(motor.dma, motor_DMA_IRQHandler, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 2, 1), id);
+		dmaSetHandler(motor.dma, motor_DMA_IRQHandler, NVIC_PRIO_DSHOT_DMA, id);
 
 		LL_DMA_Init(dma->instance.dma, dma->instance.stream, &DMA_InitStructure);
 		LL_DMA_EnableIT_TC(dma->instance.dma, dma->instance.stream);

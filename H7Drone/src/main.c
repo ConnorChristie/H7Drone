@@ -3,8 +3,10 @@
 #include "system.h"
 #include "memprot.h"
 #include "scheduler.h"
+#include "rcc.h"
 #include "imu.h"
 #include "dma.h"
+#include "sbus.h"
 #include "motors/dshot.h"
 
 static void SPI1_Init(void);
@@ -13,6 +15,8 @@ void SystemClock_Config(void);
 void initMotors(void);
 
 #define VECT_TAB_OFFSET 0x00
+
+GPIO_InitTypeDef GPIO_InitStructure;
 
 void run(void);
 
@@ -113,6 +117,9 @@ int main(void)
 	//SPI4_Init();
 	initMotors();
 
+	rxConfig_t rx_config;
+	sbusInit(rx_config);
+
 	schedulerInit();
 	schedulerSetCalulateTaskStatistics(true);
 	setTaskEnabled(TASK_GYRO, true);
@@ -123,7 +130,6 @@ int main(void)
 	setTaskEnabled(TASK_DSHOT, true);
 	setTaskEnabled(TASK_LED, true);
 
-	GPIO_InitTypeDef GPIO_InitStructure;
 	GPIO_InitStructure.Pin = GPIO_PIN_3;
 	GPIO_InitStructure.Mode = GPIO_MODE_OUTPUT_PP;
 	GPIO_InitStructure.Speed = GPIO_SPEED_FREQ_HIGH;
@@ -135,7 +141,7 @@ int main(void)
 
 void FAST_CODE FAST_CODE_NOINLINE run(void)
 {
-	while (1)
+	while (true)
 	{
 		scheduler();
 	}
@@ -200,48 +206,46 @@ static void SPI1_Init(void)
 		.extiPin = GPIO_PIN_2
 	};
 
-	__HAL_RCC_SPI1_CLK_ENABLE();
+	RCC_ClockCmd(RCC_APB2(SPI1), ENABLE);
 	__HAL_RCC_SPI1_RELEASE_RESET();
 
-	GPIO_InitTypeDef init;
-
 	// SCK
-	init.Pin = GPIO_PIN_5;
-	init.Mode = GPIO_MODE_AF_PP;
-	init.Speed = GPIO_SPEED_FAST;
-	init.Pull = GPIO_PULLDOWN;
-	init.Alternate = GPIO_AF5_SPI1;
-	HAL_GPIO_Init(GPIOA, &init);
+	GPIO_InitStructure.Pin = GPIO_PIN_5;
+	GPIO_InitStructure.Mode = GPIO_MODE_AF_PP;
+	GPIO_InitStructure.Speed = GPIO_SPEED_FAST;
+	GPIO_InitStructure.Pull = GPIO_PULLDOWN;
+	GPIO_InitStructure.Alternate = GPIO_AF5_SPI1;
+	HAL_GPIO_Init(GPIOA, &GPIO_InitStructure);
 
 	// MISO
-	init.Pin = GPIO_PIN_6;
-	init.Mode = GPIO_MODE_AF_PP;
-	init.Speed = GPIO_SPEED_FAST;
-	init.Pull = GPIO_PULLDOWN;
-	init.Alternate = GPIO_AF5_SPI1;
-	HAL_GPIO_Init(GPIOA, &init);
+	GPIO_InitStructure.Pin = GPIO_PIN_6;
+	GPIO_InitStructure.Mode = GPIO_MODE_AF_PP;
+	GPIO_InitStructure.Speed = GPIO_SPEED_FAST;
+	GPIO_InitStructure.Pull = GPIO_PULLDOWN;
+	GPIO_InitStructure.Alternate = GPIO_AF5_SPI1;
+	HAL_GPIO_Init(GPIOA, &GPIO_InitStructure);
 
 	// MOSI
-	init.Pin = GPIO_PIN_7;
-	init.Mode = GPIO_MODE_AF_PP;
-	init.Speed = GPIO_SPEED_FAST;
-	init.Pull = GPIO_PULLDOWN;
-	init.Alternate = GPIO_AF5_SPI1;
-	HAL_GPIO_Init(GPIOD, &init);
+	GPIO_InitStructure.Pin = GPIO_PIN_7;
+	GPIO_InitStructure.Mode = GPIO_MODE_AF_PP;
+	GPIO_InitStructure.Speed = GPIO_SPEED_FAST;
+	GPIO_InitStructure.Pull = GPIO_PULLDOWN;
+	GPIO_InitStructure.Alternate = GPIO_AF5_SPI1;
+	HAL_GPIO_Init(GPIOD, &GPIO_InitStructure);
 
 	// CS
-	init.Pin = spi.csPin;
-	init.Mode = GPIO_MODE_OUTPUT_PP;
-	init.Speed = GPIO_SPEED_FREQ_HIGH;
-	init.Pull = GPIO_NOPULL;
-	HAL_GPIO_Init(spi.csPinPack, &init);
+	GPIO_InitStructure.Pin = spi.csPin;
+	GPIO_InitStructure.Mode = GPIO_MODE_OUTPUT_PP;
+	GPIO_InitStructure.Speed = GPIO_SPEED_FREQ_HIGH;
+	GPIO_InitStructure.Pull = GPIO_NOPULL;
+	HAL_GPIO_Init(spi.csPinPack, &GPIO_InitStructure);
 
 	// EXTI
-	init.Pin = spi.extiPin;
-	init.Mode = GPIO_MODE_INPUT | GPIO_MODE_IT_RISING;
-	init.Speed = GPIO_SPEED_FREQ_LOW;
-	init.Pull = GPIO_NOPULL;
-	HAL_GPIO_Init(spi.extiPinPack, &init);
+	GPIO_InitStructure.Pin = spi.extiPin;
+	GPIO_InitStructure.Mode = GPIO_MODE_INPUT | GPIO_MODE_IT_RISING;
+	GPIO_InitStructure.Speed = GPIO_SPEED_FREQ_LOW;
+	GPIO_InitStructure.Pull = GPIO_NOPULL;
+	HAL_GPIO_Init(spi.extiPinPack, &GPIO_InitStructure);
 
 	spi.instance.Instance = SPI1;
 	spi.instance.Init.Mode = SPI_MODE_MASTER;
@@ -277,45 +281,43 @@ static void SPI4_Init(void)
 	spi.instance.Instance = SPI4;
 	HAL_SPI_DeInit(&spi.instance);
 
-	GPIO_InitTypeDef init;
-
 	// SCK
-	init.Pin = GPIO_PIN_12;
-	init.Mode = GPIO_MODE_AF_PP;
-	init.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
-	init.Pull = GPIO_PULLDOWN;
-	init.Alternate = GPIO_AF5_SPI4;
-	HAL_GPIO_Init(GPIOE, &init);
+	GPIO_InitStructure.Pin = GPIO_PIN_12;
+	GPIO_InitStructure.Mode = GPIO_MODE_AF_PP;
+	GPIO_InitStructure.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+	GPIO_InitStructure.Pull = GPIO_PULLDOWN;
+	GPIO_InitStructure.Alternate = GPIO_AF5_SPI4;
+	HAL_GPIO_Init(GPIOE, &GPIO_InitStructure);
 
 	// MISO
-	init.Pin = GPIO_PIN_13;
-	init.Mode = GPIO_MODE_AF_PP;
-	init.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
-	init.Pull = GPIO_PULLUP;
-	init.Alternate = GPIO_AF5_SPI4;
-	HAL_GPIO_Init(GPIOE, &init);
+	GPIO_InitStructure.Pin = GPIO_PIN_13;
+	GPIO_InitStructure.Mode = GPIO_MODE_AF_PP;
+	GPIO_InitStructure.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+	GPIO_InitStructure.Pull = GPIO_PULLUP;
+	GPIO_InitStructure.Alternate = GPIO_AF5_SPI4;
+	HAL_GPIO_Init(GPIOE, &GPIO_InitStructure);
 
 	// MOSI
-	init.Pin = GPIO_PIN_14;
-	init.Mode = GPIO_MODE_AF_PP;
-	init.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
-	init.Pull = GPIO_NOPULL;
-	init.Alternate = GPIO_AF5_SPI4;
-	HAL_GPIO_Init(GPIOE, &init);
+	GPIO_InitStructure.Pin = GPIO_PIN_14;
+	GPIO_InitStructure.Mode = GPIO_MODE_AF_PP;
+	GPIO_InitStructure.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+	GPIO_InitStructure.Pull = GPIO_NOPULL;
+	GPIO_InitStructure.Alternate = GPIO_AF5_SPI4;
+	HAL_GPIO_Init(GPIOE, &GPIO_InitStructure);
 
 	// CS
-	init.Pin = spi.csPin;
-	init.Mode = GPIO_MODE_OUTPUT_PP;
-	init.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
-	init.Pull = GPIO_NOPULL;
-	HAL_GPIO_Init(spi.csPinPack, &init);
+	GPIO_InitStructure.Pin = spi.csPin;
+	GPIO_InitStructure.Mode = GPIO_MODE_OUTPUT_PP;
+	GPIO_InitStructure.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+	GPIO_InitStructure.Pull = GPIO_NOPULL;
+	HAL_GPIO_Init(spi.csPinPack, &GPIO_InitStructure);
 
 	// EXTI
-	init.Pin = spi.extiPin;
-	init.Mode = GPIO_MODE_INPUT | GPIO_MODE_IT_RISING;
-	init.Speed = GPIO_SPEED_FREQ_LOW;
-	init.Pull = GPIO_NOPULL;
-	HAL_GPIO_Init(spi.extiPinPack, &init);
+	GPIO_InitStructure.Pin = spi.extiPin;
+	GPIO_InitStructure.Mode = GPIO_MODE_INPUT | GPIO_MODE_IT_RISING;
+	GPIO_InitStructure.Speed = GPIO_SPEED_FREQ_LOW;
+	GPIO_InitStructure.Pull = GPIO_NOPULL;
+	HAL_GPIO_Init(spi.extiPinPack, &GPIO_InitStructure);
 
 	spi.instance.Init.Mode = SPI_MODE_MASTER;
 	spi.instance.Init.Direction = SPI_DIRECTION_2LINES;

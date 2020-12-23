@@ -87,3 +87,10 @@ typedef struct sbusFrameData_s
 	uint8_t position;
 	bool done;
 } sbusFrameData_t;
+
+typedef struct
+{
+    
+} rxConfig_t;
+
+void sbusInit(rxConfig_t rxConfig);
