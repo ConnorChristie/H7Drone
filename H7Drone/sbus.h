@@ -53,12 +53,14 @@ typedef struct sbusChannels_s
 
 #define SBUS_CHANNEL_DATA_LENGTH sizeof(sbusChannels_t)
 
-enum
+typedef enum
 {
-	DEBUG_SBUS_FRAME_FLAGS = 0,
-	DEBUG_SBUS_STATE_FLAGS,
-	DEBUG_SBUS_FRAME_TIME,
-};
+	RX_FRAME_PENDING             = 0,
+	RX_FRAME_COMPLETE            = (1 << 0),
+	RX_FRAME_FAILSAFE            = (1 << 1),
+	RX_FRAME_PROCESSING_REQUIRED = (1 << 2),
+	RX_FRAME_DROPPED             = (1 << 3)
+} rxFrameState_e;
 
 struct sbusFrame_s
 {
@@ -88,9 +90,7 @@ typedef struct sbusFrameData_s
 	bool done;
 } sbusFrameData_t;
 
-typedef struct
-{
-    
-} rxConfig_t;
+void sbusInit();
 
-void sbusInit(rxConfig_t rxConfig);
+bool rxUpdateCheck(timeUs_t currentTimeUs, timeDelta_t currentDeltaTimeUs);
+void taskUpdateRxMain(timeUs_t currentTimeUs);

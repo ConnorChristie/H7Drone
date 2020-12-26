@@ -1,29 +1,7 @@
-/*
- * This file is part of Cleanflight and Betaflight.
- *
- * Cleanflight and Betaflight are free software. You can redistribute
- * this software and/or modify this software under the terms of the
- * GNU General Public License as published by the Free Software
- * Foundation, either version 3 of the License, or (at your option)
- * any later version.
- *
- * Cleanflight and Betaflight are distributed in the hope that they
- * will be useful, but WITHOUT ANY WARRANTY; without even the implied
- * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this software.
- *
- * If not, see <http://www.gnu.org/licenses/>.
- */
-
 #pragma once
 
-#include <stdbool.h>
-#include <stdint.h>
-
-#define USE_TASK_STATISTICS
+#include "platform.h"
+#include "tasks.h"
 
 #define TASK_PERIOD_HZ(hz) (1000000 / (hz))
 #define TASK_PERIOD_MS(ms) ((ms) * 1000)
@@ -37,11 +15,8 @@
 
 #define LOAD_PERCENTAGE_ONE 100
 
-typedef int32_t timeDelta_t;
-typedef uint32_t timeMs_t;
-typedef uint32_t timeUs_t;
-
-typedef enum {
+typedef enum
+{
 	TASK_PRIORITY_REALTIME = -1,
 	// Task will be run outside the scheduler logic
 	TASK_PRIORITY_IDLE = 0,
@@ -53,73 +28,13 @@ typedef enum {
 	TASK_PRIORITY_MAX = 255
 } taskPriority_e;
 
-typedef struct {
+typedef struct
+{
 	timeUs_t     maxExecutionTimeUs;
 	timeUs_t     totalExecutionTimeUs;
 	timeUs_t     averageExecutionTimeUs;
 	timeUs_t     averageDeltaTimeUs;
 } cfCheckFuncInfo_t;
-
-typedef struct {
-	const char * taskName;
-	const char * subTaskName;
-	bool         isEnabled;
-	int8_t       staticPriority;
-	timeDelta_t  desiredPeriodUs;
-	timeDelta_t  latestDeltaTimeUs;
-	timeUs_t     maxExecutionTimeUs;
-	timeUs_t     totalExecutionTimeUs;
-	timeUs_t     averageExecutionTimeUs;
-	timeUs_t     averageDeltaTimeUs;
-	float        movingAverageCycleTimeUs;
-} taskInfo_t;
-
-typedef enum {
-	/* Actual tasks */
-	TASK_SYSTEM = 0,
-	TASK_LED,
-	TASK_GYRO,
-	TASK_FILTER,
-	TASK_ACCEL,
-	TASK_COMPASS,
-	TASK_FLIGHT,
-	TASK_DSHOT,
-	/* Count of real tasks */
-	TASK_COUNT,
-
-	/* Service task IDs */
-	TASK_NONE = TASK_COUNT,
-	TASK_SELF
-} taskId_e;
-
-typedef struct {
-	// Configuration
-#if defined(USE_TASK_STATISTICS)
-	const char * taskName;
-	const char * subTaskName;
-#endif
-	bool(*checkFunc)(timeUs_t currentTimeUs, timeDelta_t currentDeltaTimeUs);
-	void(*taskFunc)(timeUs_t currentTimeUs);
-	timeDelta_t desiredPeriodUs;       // target period of execution
-	const int8_t staticPriority;     // dynamicPriority grows in steps of this size
-
-	// Scheduling
-	uint16_t dynamicPriority;        // measurement of how old task was last executed, used to avoid task starvation
-	uint16_t taskAgeCycles;
-	timeDelta_t taskLatestDeltaTimeUs;
-	timeUs_t lastExecutedAtUs;         // last time of invocation
-	timeUs_t lastSignaledAtUs;         // time of invocation event for event-driven tasks
-	timeUs_t lastDesiredAt;          // time of last desired execution
-
-#if defined(USE_TASK_STATISTICS)
-	// Statistics
-	float    movingAverageCycleTimeUs;
-	timeUs_t movingSumExecutionTimeUs;   // moving sum over 32 samples
-	timeUs_t movingSumDeltaTimeUs;   // moving sum over 32 samples
-	timeUs_t maxExecutionTimeUs;
-	timeUs_t totalExecutionTimeUs;     // total time consumed by task since boot
-#endif
-} task_t;
 
 void getCheckFuncInfo(cfCheckFuncInfo_t *checkFuncInfo);
 void getTaskInfo(taskId_e taskId, taskInfo_t *taskInfo);

@@ -216,7 +216,13 @@ void schedulerInit(void)
 {
 	calculateTaskStatistics = true;
 	queueClear();
-	queueAdd(getTask(TASK_SYSTEM));
+
+	task_t *task = getTask(TASK_SYSTEM);
+
+	for (int i = 0; i < TASK_COUNT; i++)
+	{
+		queueAdd(task++);
+	}
 }
 
 void schedulerOptimizeRate(bool optimizeRate)

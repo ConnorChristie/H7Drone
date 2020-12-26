@@ -116,19 +116,11 @@ int main(void)
 	SPI1_Init();
 	//SPI4_Init();
 	initMotors();
-
-	rxConfig_t rx_config;
-	sbusInit(rx_config);
+	sbusInit();
 
 	schedulerInit();
 	schedulerSetCalulateTaskStatistics(true);
-	setTaskEnabled(TASK_GYRO, true);
-	setTaskEnabled(TASK_FILTER, false);
-	setTaskEnabled(TASK_ACCEL, true);
 	setTaskEnabled(TASK_COMPASS, false);
-	setTaskEnabled(TASK_FLIGHT, true);
-	setTaskEnabled(TASK_DSHOT, true);
-	setTaskEnabled(TASK_LED, true);
 
 	GPIO_InitStructure.Pin = GPIO_PIN_3;
 	GPIO_InitStructure.Mode = GPIO_MODE_OUTPUT_PP;

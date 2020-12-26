@@ -79,7 +79,19 @@ void devPush(stdev_t *dev, float x);
 float devVariance(stdev_t *dev);
 float devStandardDeviation(stdev_t *dev);
 
+float invSqrt(float x);
+
 static inline int constrain(int amt, int low, int high)
+{
+	if (amt < low)
+		return low;
+	else if (amt > high)
+		return high;
+	else
+		return amt;
+}
+
+static inline float constrainf(float amt, float low, float high)
 {
 	if (amt < low)
 		return low;

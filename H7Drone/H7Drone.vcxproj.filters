@@ -1032,6 +1032,12 @@
     <ClInclude Include="src\accgyro_mpu.h">
       <Filter>Header files\drivers</Filter>
     </ClInclude>
+    <ClInclude Include="pid.h">
+      <Filter>Header files\flight</Filter>
+    </ClInclude>
+    <ClInclude Include="control.h">
+      <Filter>Header files\flight</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.c">
@@ -1087,6 +1093,15 @@
     </ClCompile>
     <ClCompile Include="src\spi.c">
       <Filter>Source files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="serial_uart.c">
+      <Filter>Source files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="pid.c">
+      <Filter>Source files\flight</Filter>
+    </ClCompile>
+    <ClCompile Include="control.c">
+      <Filter>Source files\flight</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

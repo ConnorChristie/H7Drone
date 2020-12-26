@@ -1,18 +1,17 @@
 #include "imu.h"
+#include "platform.h"
 #include "system.h"
 #include "flight.h"
 #include "drivers/mpu6000.h"
 #include "drivers/icm20602.h"
 
-#include <string.h>
-#include <stdlib.h>
-
-imuData_t imuData;
-uint8_t imuDeviceCount = 0;
-imuDev_t *imuDevices = NULL;
+FAST_DATA_ZERO_INIT imuData_t imuData;
+u8 imuDeviceCount = 0;
+static imuDev_t *imuDevices = NULL;
+static firFilter_s firFilterGyroX, firFilterGyroY, firFilterGyroZ;
 
 static void performAccelCalibration(imuDev_t *device, const vector3_t rawAccelData);
-static void performGyroCalibration(imuDev_t *device, const vector3_t rawGyroData, uint8_t gyroMovementgyroCalibrationThreshold);
+static void performGyroCalibration(imuDev_t *device, const vector3_t rawGyroData, u8 gyroMovementgyroCalibrationThreshold);
 static uint32_t accelCalculateCalibratingCycles(void);
 static uint32_t gyroCalculateCalibratingCycles(void);
 
@@ -23,14 +22,18 @@ void onDataReady(void *ctx)
 	imu->dataReady = true;
 }
 
-void imuInit(spiInstance_t spi, uint8_t index)
+void imuInit(spiInstance_t spi, u8 index)
 {
 	imuDeviceCount++;
 
 	if (imuDevices == NULL)
+	{
 		imuDevices = malloc(imuDeviceCount * sizeof(imuDev_t));
+	}
 	else
+	{
 		imuDevices = realloc(imuDevices, imuDeviceCount * sizeof(imuDev_t));
+	}
 
 	imuDev_t *imu = &imuDevices[index];
 	memset(imu, 0, sizeof(imuDev_t));
@@ -61,12 +64,42 @@ void imuInit(spiInstance_t spi, uint8_t index)
 	imu->acc_1G_rec = 1.0f / imu->acc_1G;
 }
 
+float firFilterUpdate(firFilter_s *fir, float input)
+{
+	fir->buffer[fir->bufferIndex] = input;
+	fir->bufferIndex++;
+
+	if (fir->bufferIndex == FIR_FILTER_LENGTH)
+	{
+		fir->bufferIndex = 0;
+	}
+
+	float output = 0;
+	u8 sumIndex = fir->bufferIndex;
+
+	for (u8 n = 0; n < FIR_FILTER_LENGTH; n++)
+	{
+		if (sumIndex > 0)
+		{
+			sumIndex--;
+		}
+		else
+		{
+			sumIndex = FIR_FILTER_LENGTH - 1;
+		}
+		
+		output += FIR_IMPULSE_RESPONSE[n] * fir->buffer[sumIndex];
+	}
+
+	return output;
+}
+
 void imuUpdateGyroReadings(void)
 {
 	vector3_t rawGyroData;
 	imuData.areGyrosCalibrated = true;
 
-	for (uint8_t i = 0; i < imuDeviceCount; i++)
+	for (u8 i = 0; i < imuDeviceCount; i++)
 	{
 		imuDev_t *imu = &imuDevices[i];
 
@@ -86,6 +119,10 @@ void imuUpdateGyroReadings(void)
 			imuData.gyroData.x = (rawGyroData.x - imu->gyroZero.x) * imu->gyroScale;
 			imuData.gyroData.y = (rawGyroData.y - imu->gyroZero.y) * imu->gyroScale;
 			imuData.gyroData.z = (rawGyroData.z - imu->gyroZero.z) * imu->gyroScale;
+
+			imuData.gyroData.x = -imuData.gyroData.x;
+			imuData.gyroData.y = imuData.gyroData.y;
+			imuData.gyroData.z = imuData.gyroData.z;
 		}
 		else
 		{
@@ -103,14 +140,20 @@ vector3f_t accumulatedMeasurements;
 vector3f_t gyroPrevious;
 int accumulatedMeasurementCount;
 
+vector3f_t filteredGyro;
+
 void imuFilterGyro(timeUs_t currentTimeUs)
 {
-	accumulatedMeasurements.x += 0.5f * (gyroPrevious.x + imuData.gyroData.x) * 125;
-	accumulatedMeasurements.y += 0.5f * (gyroPrevious.y + imuData.gyroData.y) * 125;
-	accumulatedMeasurements.z += 0.5f * (gyroPrevious.z + imuData.gyroData.z) * 125;
-
-	memcpy(&gyroPrevious.xyz, &imuData.gyroData.xyz, sizeof(imuData.gyroData.xyz));
-	accumulatedMeasurementCount++;
+//	imuData.gyroData.x = firFilterUpdate(&firFilterGyroX, imuData.gyroData.x);
+//	imuData.gyroData.y = firFilterUpdate(&firFilterGyroY, imuData.gyroData.y);
+//	imuData.gyroData.z = firFilterUpdate(&firFilterGyroZ, imuData.gyroData.z);
+//
+//	accumulatedMeasurements.x += 0.5f * (gyroPrevious.x + imuData.gyroData.x) * 125;
+//	accumulatedMeasurements.y += 0.5f * (gyroPrevious.y + imuData.gyroData.y) * 125;
+//	accumulatedMeasurements.z += 0.5f * (gyroPrevious.z + imuData.gyroData.z) * 125;
+//
+//	memcpy(&gyroPrevious.xyz, &imuData.gyroData.xyz, sizeof(imuData.gyroData.xyz));
+//	accumulatedMeasurementCount++;
 }
 
 // TODO: Finish getting accumated average
@@ -120,7 +163,7 @@ void imuUpdateAccelReadings(void)
 	vector3_t rawAccelData;
 	imuData.areAccelsCalibrated = true;
 
-	for (uint8_t i = 0; i < imuDeviceCount; i++)
+	for (u8 i = 0; i < imuDeviceCount; i++)
 	{
 		imuDev_t *imu = &imuDevices[i];
 		imu->accelReadFn((struct imuDev_t*)imu, &rawAccelData);
@@ -171,17 +214,12 @@ bool isAccelDataGood()
 	return accMagnitudeSq > 0.81f && 1.21f > accMagnitudeSq;
 }
 
-imuData_t* imuGetData(void)
-{
-	return &imuData;
-}
-
-static uint32_t gyroCalculateCalibratingCycles(void)
+static u32 gyroCalculateCalibratingCycles(void)
 {
 	return 1000;
 }
 
-static uint32_t accelCalculateCalibratingCycles(void)
+static u32 accelCalculateCalibratingCycles(void)
 {
 	return 400;
 }
@@ -214,7 +252,7 @@ static void performAccelCalibration(imuDev_t *device, const vector3_t rawAccelDa
 	device->accelCalibration.cyclesRemaining--;
 }
 
-static void performGyroCalibration(imuDev_t *device, const vector3_t rawGyroData, uint8_t gyroMovementgyroCalibrationThreshold)
+static void performGyroCalibration(imuDev_t *device, const vector3_t rawGyroData, u8 gyroMovementgyroCalibrationThreshold)
 {
 	if (isGyroCalibrated(device)) return;
 

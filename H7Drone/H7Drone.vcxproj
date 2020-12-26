@@ -73,7 +73,10 @@
   </ImportGroup>
   <ItemGroup />
   <ItemGroup>
+    <ClCompile Include="control.c" />
+    <ClCompile Include="pid.c" />
     <ClCompile Include="sbus.c" />
+    <ClCompile Include="serial_uart.c" />
     <ClCompile Include="src\dma.c" />
     <ClCompile Include="src\drivers\icm20602.c" />
     <ClCompile Include="src\drivers\mpu6000.c" />
@@ -212,7 +215,9 @@
     <ClCompile Include="$(BSP_ROOT)\STM32H7xxxx\STM32H7xx_HAL_Driver\Src\stm32h7xx_ll_tim.c" />
     <ClCompile Include="$(BSP_ROOT)\STM32H7xxxx\STM32H7xx_HAL_Driver\Src\stm32h7xx_ll_usart.c" />
     <ClCompile Include="$(BSP_ROOT)\STM32H7xxxx\STM32H7xx_HAL_Driver\Src\stm32h7xx_ll_utils.c" />
+    <ClInclude Include="control.h" />
     <ClInclude Include="nvic.h" />
+    <ClInclude Include="pid.h" />
     <ClInclude Include="sbus.h" />
     <ClInclude Include="serial_uart.h" />
     <ClInclude Include="src\accgyro_mpu.h" />
