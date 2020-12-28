@@ -1038,9 +1038,6 @@
     <ClInclude Include="control.h">
       <Filter>Header files\flight</Filter>
     </ClInclude>
-    <ClInclude Include="rc.h">
-      <Filter>Header files\rx</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.c">
@@ -1105,9 +1102,6 @@
     </ClCompile>
     <ClCompile Include="control.c">
       <Filter>Source files\flight</Filter>
-    </ClCompile>
-    <ClCompile Include="rc.c">
-      <Filter>Source files\rx</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

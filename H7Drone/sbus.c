@@ -2,7 +2,6 @@
 #include "system.h"
 #include "serial_uart.h"
 #include "control.h"
-#include "rc.h"
 
 #define SBUS_DIGITAL_CHANNEL_MIN 173
 #define SBUS_DIGITAL_CHANNEL_MAX 1812
@@ -12,7 +11,30 @@
 
 sbusFrameData_t sbusFrameData;
 
-u8 sbusFrameStatus()
+void sbusDataReceive(u16 c, void *data);
+
+void sbusInit(void)
+{
+	serialPort_s port = {};
+	
+	port.init.BaudRate = 100000;
+	port.init.Mode = UART_MODE_RX;
+	port.init.Parity = UART_PARITY_EVEN;
+	port.init.StopBits = USART_STOPBITS_2;
+	port.init.WordLength = UART_WORDLENGTH_9B;
+	port.init.HwFlowCtl = UART_HWCONTROL_NONE;
+	port.init.OneBitSampling = UART_ONE_BIT_SAMPLE_DISABLE;
+
+	port.advInit.AdvFeatureInit |= UART_ADVFEATURE_RXINVERT_INIT;
+	port.advInit.RxPinLevelInvert = UART_ADVFEATURE_RXINV_ENABLE;
+
+	port.rxCallback = sbusDataReceive;
+	port.rxCallbackData = &sbusFrameData;
+
+	uartInit(UARTDEV_6, port);
+}
+
+u8 sbusFrameStatus(void)
 {
 	if (!sbusFrameData.done)
 	{
@@ -37,7 +59,7 @@ u8 sbusFrameStatus()
 	return RX_FRAME_COMPLETE;
 }
 
-static void sbusDataReceive(u16 c, void *data)
+void sbusDataReceive(u16 c, void *data)
 {
 	sbusFrameData_t *sbusFrameData = (sbusFrameData_t *)data;
 
@@ -116,25 +138,4 @@ void sbusReadRawRC(float *channelData)
 	{
 		channelData[i] = (5 * sbusChannelData[i] / 8) + 880;
 	}
-}
-
-void sbusInit()
-{
-	serialPort_s port = { };
-	
-	port.init.BaudRate = 100000;
-	port.init.Mode = UART_MODE_RX;
-	port.init.Parity = UART_PARITY_EVEN;
-	port.init.StopBits = USART_STOPBITS_2;
-	port.init.WordLength = UART_WORDLENGTH_9B;
-	port.init.HwFlowCtl = UART_HWCONTROL_NONE;
-	port.init.OneBitSampling = UART_ONE_BIT_SAMPLE_DISABLE;
-
-	port.advInit.AdvFeatureInit |= UART_ADVFEATURE_RXINVERT_INIT;
-	port.advInit.RxPinLevelInvert = UART_ADVFEATURE_RXINV_ENABLE;
-
-	port.rxCallback = sbusDataReceive;
-	port.rxCallbackData = &sbusFrameData;
-
-	uartInit(UARTDEV_6, port);
 }

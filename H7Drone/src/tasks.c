@@ -1,12 +1,11 @@
 #include "tasks.h"
+#include "platform.h"
+
 #include "imu.h"
 #include "flight.h"
 #include "motors/dshot.h"
-#include "rc.h"
+#include "control.h"
 #include "pid.h"
-
-#include <stm32h7xx_hal.h>
-#include <stdio.h>
 
 void taskGyroSample(timeUs_t currentTimeUs)
 {

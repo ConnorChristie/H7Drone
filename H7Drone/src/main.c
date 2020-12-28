@@ -6,7 +6,7 @@
 #include "rcc.h"
 #include "imu.h"
 #include "dma.h"
-#include "sbus.h"
+#include "control.h"
 #include "motors/dshot.h"
 #include "pid.h"
 
@@ -117,7 +117,7 @@ int main(void)
 	SPI1_Init();
 	//SPI4_Init();
 	initMotors();
-	sbusInit();
+	initControl();
 	pidInit();
 
 	schedulerInit();

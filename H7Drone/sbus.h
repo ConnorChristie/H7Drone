@@ -81,6 +81,6 @@ typedef struct sbusFrameData_s
 	bool done;
 } sbusFrameData_t;
 
-void sbusInit();
-u8 sbusFrameStatus();
+void sbusInit(void);
+u8 sbusFrameStatus(void);
 void sbusReadRawRC(float *channelData);
