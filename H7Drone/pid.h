@@ -1,5 +1,21 @@
 #pragma once
 
+#include "platform.h"
+#include "control.h"
+
+typedef enum {
+	PID_ROLL   = CONTROL_ROLL,
+	PID_PITCH  = CONTROL_PITCH,
+	PID_YAW    = CONTROL_YAW,
+	PID_ITEM_COUNT
+} pidIndex_e;
+
+typedef struct
+{
+	/* Integrator limits */
+	float itermLimit;
+} pidRuntime_t;
+
 typedef struct
 {
 	/* Controller gains */
@@ -14,9 +30,6 @@ typedef struct
 	float limMin;
 	float limMax;
 
-	/* Integrator limits */
-	float itermLimit;
-
 	/* Sample time (in seconds) */
 	float T;
 
@@ -29,4 +42,5 @@ typedef struct
 	float sum;
 } pidData_t;
 
-void pidUpdate();
+void pidInit(void);
+void pidUpdate(timeUs_t currentTimeUs);

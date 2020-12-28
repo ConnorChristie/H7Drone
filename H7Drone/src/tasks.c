@@ -2,7 +2,7 @@
 #include "imu.h"
 #include "flight.h"
 #include "motors/dshot.h"
-#include "sbus.h"
+#include "rc.h"
 #include "pid.h"
 
 #include <stm32h7xx_hal.h>

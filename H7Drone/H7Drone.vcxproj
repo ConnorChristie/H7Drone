@@ -75,6 +75,7 @@
   <ItemGroup>
     <ClCompile Include="control.c" />
     <ClCompile Include="pid.c" />
+    <ClCompile Include="rc.c" />
     <ClCompile Include="sbus.c" />
     <ClCompile Include="serial_uart.c" />
     <ClCompile Include="src\dma.c" />
@@ -218,6 +219,7 @@
     <ClInclude Include="control.h" />
     <ClInclude Include="nvic.h" />
     <ClInclude Include="pid.h" />
+    <ClInclude Include="rc.h" />
     <ClInclude Include="sbus.h" />
     <ClInclude Include="serial_uart.h" />
     <ClInclude Include="src\accgyro_mpu.h" />

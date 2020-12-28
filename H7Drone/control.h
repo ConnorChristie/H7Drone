@@ -2,6 +2,13 @@
 
 #include "platform.h"
 
+typedef enum {
+	CONTROL_ROLL,
+	CONTROL_PITCH,
+	CONTROL_YAW,
+	CONTROL_ITEM_COUNT
+} controlIndex_e;
+
 bool isArmed(void);
 void setArmed(bool isArmed);
 

@@ -8,6 +8,7 @@
 #include "dma.h"
 #include "sbus.h"
 #include "motors/dshot.h"
+#include "pid.h"
 
 static void SPI1_Init(void);
 static void SPI4_Init(void);
@@ -117,11 +118,13 @@ int main(void)
 	//SPI4_Init();
 	initMotors();
 	sbusInit();
+	pidInit();
 
 	schedulerInit();
 	schedulerSetCalulateTaskStatistics(true);
 	setTaskEnabled(TASK_COMPASS, false);
 
+	// LED
 	GPIO_InitStructure.Pin = GPIO_PIN_3;
 	GPIO_InitStructure.Mode = GPIO_MODE_OUTPUT_PP;
 	GPIO_InitStructure.Speed = GPIO_SPEED_FREQ_HIGH;
@@ -254,7 +257,7 @@ static void SPI1_Init(void)
 
 	HAL_SPI_Init(&spi.instance);
 
-	imuInit(spi, 0);
+	imuInit(spi, 0, CW0_DEG_FLIP);
 }
 
 static void SPI4_Init(void)
@@ -327,7 +330,7 @@ static void SPI4_Init(void)
 
 	HAL_SPI_Init(&spi.instance);
 
-	imuInit(spi, 1);
+	imuInit(spi, 1, CW0_DEG_FLIP);
 }
 
 static void Error_Handler(void)

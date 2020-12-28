@@ -2,18 +2,19 @@
 #include "platform.h"
 #include "system.h"
 #include "flight.h"
+
 #include "drivers/mpu6000.h"
 #include "drivers/icm20602.h"
 
 FAST_DATA_ZERO_INIT imuData_t imuData;
 u8 imuDeviceCount = 0;
 static imuDev_t *imuDevices = NULL;
-static firFilter_s firFilterGyroX, firFilterGyroY, firFilterGyroZ;
 
 static void performAccelCalibration(imuDev_t *device, const vector3_t rawAccelData);
 static void performGyroCalibration(imuDev_t *device, const vector3_t rawGyroData, u8 gyroMovementgyroCalibrationThreshold);
-static uint32_t accelCalculateCalibratingCycles(void);
-static uint32_t gyroCalculateCalibratingCycles(void);
+static u32 accelCalculateCalibratingCycles(void);
+static u32 gyroCalculateCalibratingCycles(void);
+void alignSensorViaRotation(vector3f_t *dest, sensorAlign_e rotation);
 
 void onDataReady(void *ctx)
 {
@@ -22,7 +23,7 @@ void onDataReady(void *ctx)
 	imu->dataReady = true;
 }
 
-void imuInit(spiInstance_t spi, u8 index)
+void imuInit(spiInstance_t spi, u8 index, sensorAlign_e alignment)
 {
 	imuDeviceCount++;
 
@@ -38,6 +39,7 @@ void imuInit(spiInstance_t spi, u8 index)
 	imuDev_t *imu = &imuDevices[index];
 	memset(imu, 0, sizeof(imuDev_t));
 
+	imu->alignment = alignment;
 	imu->spiInstance = spi;
 	imu->accelCalibration.cyclesRemaining = accelCalculateCalibratingCycles();
 	imu->gyroCalibration.cyclesRemaining = gyroCalculateCalibratingCycles();
@@ -64,39 +66,9 @@ void imuInit(spiInstance_t spi, u8 index)
 	imu->acc_1G_rec = 1.0f / imu->acc_1G;
 }
 
-float firFilterUpdate(firFilter_s *fir, float input)
-{
-	fir->buffer[fir->bufferIndex] = input;
-	fir->bufferIndex++;
-
-	if (fir->bufferIndex == FIR_FILTER_LENGTH)
-	{
-		fir->bufferIndex = 0;
-	}
-
-	float output = 0;
-	u8 sumIndex = fir->bufferIndex;
-
-	for (u8 n = 0; n < FIR_FILTER_LENGTH; n++)
-	{
-		if (sumIndex > 0)
-		{
-			sumIndex--;
-		}
-		else
-		{
-			sumIndex = FIR_FILTER_LENGTH - 1;
-		}
-		
-		output += FIR_IMPULSE_RESPONSE[n] * fir->buffer[sumIndex];
-	}
-
-	return output;
-}
-
 void imuUpdateGyroReadings(void)
 {
-	vector3_t rawGyroData;
+	// Overridden down below
 	imuData.areGyrosCalibrated = true;
 
 	for (u8 i = 0; i < imuDeviceCount; i++)
@@ -109,83 +81,52 @@ void imuUpdateGyroReadings(void)
 		}
 
 		imu->dataReady = false;
-		imu->gyroReadFn((struct imuDev_t*)imu, &rawGyroData);
+		imu->gyroReadFn((struct imuDev_t*)imu, &imuData.rawGyroData);
 
 		bool caliibrated = isGyroCalibrated(imu);
 		imuData.areGyrosCalibrated &= caliibrated;
 
 		if (caliibrated)
 		{
-			imuData.gyroData.x = (rawGyroData.x - imu->gyroZero.x) * imu->gyroScale;
-			imuData.gyroData.y = (rawGyroData.y - imu->gyroZero.y) * imu->gyroScale;
-			imuData.gyroData.z = (rawGyroData.z - imu->gyroZero.z) * imu->gyroScale;
+			imuData.gyroData.x = (imuData.rawGyroData.x - imu->gyroZero.x) * imu->gyroScale;
+			imuData.gyroData.y = (imuData.rawGyroData.y - imu->gyroZero.y) * imu->gyroScale;
+			imuData.gyroData.z = (imuData.rawGyroData.z - imu->gyroZero.z) * imu->gyroScale;
 
-			imuData.gyroData.x = -imuData.gyroData.x;
-			imuData.gyroData.y = imuData.gyroData.y;
-			imuData.gyroData.z = imuData.gyroData.z;
+			alignSensorViaRotation(&imuData.gyroData, imu->alignment);
 		}
 		else
 		{
-			performGyroCalibration(imu, rawGyroData, 48);
+			performGyroCalibration(imu, imuData.rawGyroData, 48);
 		}
 	}
-	
-//	imuData.sampleSum.x += imuData.gyroData.x;
-//	imuData.sampleSum.y += imuData.gyroData.y;
-//	imuData.sampleSum.z += imuData.gyroData.z;
-//	imuData.sampleCount++;
 }
-
-vector3f_t accumulatedMeasurements;
-vector3f_t gyroPrevious;
-int accumulatedMeasurementCount;
-
-vector3f_t filteredGyro;
 
 void imuFilterGyro(timeUs_t currentTimeUs)
 {
-//	imuData.gyroData.x = firFilterUpdate(&firFilterGyroX, imuData.gyroData.x);
-//	imuData.gyroData.y = firFilterUpdate(&firFilterGyroY, imuData.gyroData.y);
-//	imuData.gyroData.z = firFilterUpdate(&firFilterGyroZ, imuData.gyroData.z);
-//
-//	accumulatedMeasurements.x += 0.5f * (gyroPrevious.x + imuData.gyroData.x) * 125;
-//	accumulatedMeasurements.y += 0.5f * (gyroPrevious.y + imuData.gyroData.y) * 125;
-//	accumulatedMeasurements.z += 0.5f * (gyroPrevious.z + imuData.gyroData.z) * 125;
-//
-//	memcpy(&gyroPrevious.xyz, &imuData.gyroData.xyz, sizeof(imuData.gyroData.xyz));
-//	accumulatedMeasurementCount++;
 }
-
-// TODO: Finish getting accumated average
 
 void imuUpdateAccelReadings(void)
 {
-	vector3_t rawAccelData;
+	// Overridden down below
 	imuData.areAccelsCalibrated = true;
 
 	for (u8 i = 0; i < imuDeviceCount; i++)
 	{
 		imuDev_t *imu = &imuDevices[i];
-		imu->accelReadFn((struct imuDev_t*)imu, &rawAccelData);
+		imu->accelReadFn((struct imuDev_t*)imu, &imuData.rawAccelData);
 
 		bool caliibrated = isAccelCalibrated(imu);
 		imuData.areAccelsCalibrated &= caliibrated;
 
 		if (caliibrated)
 		{
-			rawAccelData.x -= imu->accelTrims.x;
-			rawAccelData.y -= imu->accelTrims.y;
-			rawAccelData.z -= imu->accelTrims.z;
-
-			imuData.accelData.x = (float)rawAccelData.x / imu->accelScale;
-			imuData.accelData.y = (float)rawAccelData.y / imu->accelScale;
-			imuData.accelData.z = (float)rawAccelData.z / imu->accelScale;
-			
-			int a = 1;
+			imuData.accelData.x = (float)(imuData.rawAccelData.x - imu->accelTrims.x) / imu->accelScale;
+			imuData.accelData.y = (float)(imuData.rawAccelData.y - imu->accelTrims.y) / imu->accelScale;
+			imuData.accelData.z = (float)(imuData.rawAccelData.z - imu->accelTrims.z) / imu->accelScale;
 		}
 		else
 		{
-			performAccelCalibration(imu, rawAccelData);
+			performAccelCalibration(imu, imuData.rawAccelData);
 		}
 	}
 }
@@ -288,26 +229,53 @@ static void performGyroCalibration(imuDev_t *device, const vector3_t rawGyroData
 	device->gyroCalibration.cyclesRemaining--;
 }
 
-//static void filterGyro(imuData_t *data)
-//{
-//	for (int axis = 0; axis < 3; axis++)
-//	{
-//		// downsample the individual gyro samples
-//		float gyroADCf = 0;
-//
-//		// using simple average for downsampling
-//		if (data->sampleCount)
-//		{
-//			gyroADCf = data->sampleSum[axis] / data->sampleCount;
-//		}
-//		data->sampleSum[axis] = 0;
-//
-//		// apply static notch filters and software lowpass filters
-//		gyroADCf = notchFilter1((filter_t *)&gyro.notchFilter1[axis], gyroADCf);
-//		gyroADCf = notchFilter2((filter_t *)&gyro.notchFilter2[axis], gyroADCf);
-//		gyroADCf = lowpassFilter((filter_t *)&gyro.lowpassFilter[axis], gyroADCf);
-//
-//		data->gyroDataFiltered.xyz[axis] = gyroADCf;
-//	}
-//	data->sampleCount = 0;
-//}
+FAST_CODE void alignSensorViaRotation(vector3f_t *dest, sensorAlign_e rotation)
+{
+	const float x = dest->x;
+	const float y = dest->y;
+	const float z = dest->z;
+
+	switch (rotation) {
+	default:
+	case CW0_DEG:
+		dest->x = x;
+		dest->y = y;
+		dest->z = z;
+		break;
+	case CW90_DEG:
+		dest->x = y;
+		dest->y = -x;
+		dest->z = z;
+		break;
+	case CW180_DEG:
+		dest->x = -x;
+		dest->y = -y;
+		dest->z = z;
+		break;
+	case CW270_DEG:
+		dest->x = -y;
+		dest->y = x;
+		dest->z = z;
+		break;
+	case CW0_DEG_FLIP:
+		dest->x = -x;
+		dest->y = y;
+		dest->z = -z;
+		break;
+	case CW90_DEG_FLIP:
+		dest->x = y;
+		dest->y = x;
+		dest->z = -z;
+		break;
+	case CW180_DEG_FLIP:
+		dest->x = x;
+		dest->y = -y;
+		dest->z = -z;
+		break;
+	case CW270_DEG_FLIP:
+		dest->x = -y;
+		dest->y = -x;
+		dest->z = -z;
+		break;
+	}
+}

@@ -37,5 +37,8 @@ float getSetpointRate(int axis)
 
 void updateSetpointRate(int axis, float setpoint)
 {
-	setpoints.xyz[axis] = setpoint;
+	float rcCommandf = setpoint - 1500;
+	rcCommandf = rcCommandf / 500.0f;
+
+	setpoints.xyz[axis] = rcCommandf;
 }

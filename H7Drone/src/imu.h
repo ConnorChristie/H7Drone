@@ -25,8 +25,26 @@ typedef struct
 	u32 cyclesRemaining;
 } gyroCalibration_t;
 
+typedef enum
+{
+    ALIGN_DEFAULT = 0, // driver-provided alignment
+
+    // the order of these 8 values also correlate to corresponding code in ALIGNMENT_TO_BITMASK.
+
+                            // R, P, Y
+    CW0_DEG = 1,            // 00,00,00
+    CW90_DEG = 2,           // 00,00,01
+    CW180_DEG = 3,          // 00,00,10
+    CW270_DEG = 4,          // 00,00,11
+    CW0_DEG_FLIP = 5,       // 00,10,00 // _FLIP = 2x90 degree PITCH rotations
+    CW90_DEG_FLIP = 6,      // 00,10,01
+    CW180_DEG_FLIP = 7,     // 00,10,10
+    CW270_DEG_FLIP = 8,     // 00,10,11
+} sensorAlign_e;
+
 typedef struct
 {
+	sensorAlign_e alignment;
 	spiInstance_t spiInstance;
 	imuInitFuncPtr initFn;
 	bool dataReady;
@@ -54,26 +72,18 @@ typedef struct
 {
 	// m/s^2
 	vector3f_t accelData;
+	vector3_t rawAccelData;
 	// degrees/s
 	vector3f_t gyroData;
+	vector3_t rawGyroData;
 
 	bool areGyrosCalibrated;
 	bool areAccelsCalibrated;
 } imuData_t;
 
-#define FIR_FILTER_LENGTH 64
-
-static float FIR_IMPULSE_RESPONSE[FIR_FILTER_LENGTH] = { 0.0004167f, 0.0004284f, 0.0004611f, 0.0005148f, 0.0005891f, 0.0006834f, 0.0007969f, 0.0009286f, 0.0010774f, 0.0012419f, 0.0014206f, 0.0016118f, 0.0018137f, 0.0020244f, 0.0022419f, 0.0024641f, 0.0026889f, 0.0029140f, 0.0031373f, 0.0033566f, 0.0035697f, 0.0037746f, 0.0039692f, 0.0041516f, 0.0043200f, 0.0044728f, 0.0046085f, 0.0047256f, 0.0048231f, 0.0048999f, 0.0049553f, 0.0049888f, 0.0050000f, 0.0049888f, 0.0049553f, 0.0048999f, 0.0048231f, 0.0047256f, 0.0046085f, 0.0044728f, 0.0043200f, 0.0041516f, 0.0039692f, 0.0037746f, 0.0035697f, 0.0033566f, 0.0031373f, 0.0029140f, 0.0026889f, 0.0024641f, 0.0022419f, 0.0020244f, 0.0018137f, 0.0016118f, 0.0014206f, 0.0012419f, 0.0010774f, 0.0009286f, 0.0007969f, 0.0006834f, 0.0005891f, 0.0005148f, 0.0004611f, 0.0004284f };
-
-typedef struct
-{
-	float buffer[FIR_FILTER_LENGTH];
-	u8 bufferIndex;
-} firFilter_s;
-
 extern imuData_t imuData;
 
-void imuInit(spiInstance_t spi, u8 index);
+void imuInit(spiInstance_t spi, u8 index, sensorAlign_e alignment);
 void imuUpdateGyroReadings(void);
 void imuUpdateAccelReadings(void);
 void imuUpdateMagReadings(void);

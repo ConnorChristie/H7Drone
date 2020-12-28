@@ -53,15 +53,6 @@ typedef struct sbusChannels_s
 
 #define SBUS_CHANNEL_DATA_LENGTH sizeof(sbusChannels_t)
 
-typedef enum
-{
-	RX_FRAME_PENDING             = 0,
-	RX_FRAME_COMPLETE            = (1 << 0),
-	RX_FRAME_FAILSAFE            = (1 << 1),
-	RX_FRAME_PROCESSING_REQUIRED = (1 << 2),
-	RX_FRAME_DROPPED             = (1 << 3)
-} rxFrameState_e;
-
 struct sbusFrame_s
 {
 	u8 syncByte;
@@ -91,6 +82,5 @@ typedef struct sbusFrameData_s
 } sbusFrameData_t;
 
 void sbusInit();
-
-bool rxUpdateCheck(timeUs_t currentTimeUs, timeDelta_t currentDeltaTimeUs);
-void taskUpdateRxMain(timeUs_t currentTimeUs);
+u8 sbusFrameStatus();
+void sbusReadRawRC(float *channelData);
