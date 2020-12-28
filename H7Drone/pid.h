@@ -3,7 +3,8 @@
 #include "platform.h"
 #include "control.h"
 
-typedef enum {
+typedef enum
+{
 	PID_ROLL   = CONTROL_ROLL,
 	PID_PITCH  = CONTROL_PITCH,
 	PID_YAW    = CONTROL_YAW,
@@ -41,6 +42,8 @@ typedef struct
 
 	float sum;
 } pidData_t;
+
+extern pidData_t pidData[PID_ITEM_COUNT];
 
 void pidInit(void);
 void pidUpdate(timeUs_t currentTimeUs);

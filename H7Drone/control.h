@@ -17,17 +17,20 @@ typedef enum {
 	CONTROL_ROLL,
 	CONTROL_PITCH,
 	CONTROL_YAW,
+	CONTROL_THROTTLE,
 	CONTROL_ITEM_COUNT
 } controlIndex_e;
-
-extern float channelData[MAX_CHANNEL_COUNT];
 
 typedef struct
 {
 	void (*init)(void);
-	void(*readRawRc)(float *channelData);
+	void (*readRawRc)(float *channelData, int count);
 	u8 (*readStatus)(void);
 } controlVtable_t;
+
+extern float controlData[MAX_CHANNEL_COUNT];
+
+void initControl(void);
 
 bool rxUpdateCheck(timeUs_t currentTimeUs, timeDelta_t currentDeltaTimeUs);
 void taskUpdateRxMain(timeUs_t currentTimeUs);

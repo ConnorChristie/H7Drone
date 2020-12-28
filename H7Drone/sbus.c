@@ -94,9 +94,9 @@ void sbusDataReceive(u16 c, void *data)
 	}
 }
 
-void sbusReadRawRC(float *channelData)
+void sbusReadRawRC(float *channelData, int count)
 {
-	static u16 sbusChannelData[SBUS_CHANNEL_DATA_LENGTH];
+	static u16 sbusChannelData[SBUS_MAX_CHANNEL];
 	const sbusChannels_t *channels = &sbusFrameData.frame.frame.channels;
 
 	sbusChannelData[0] = channels->chan0;
@@ -134,8 +134,15 @@ void sbusReadRawRC(float *channelData)
 		sbusChannelData[17] = SBUS_DIGITAL_CHANNEL_MIN;
 	}
 
-	for (int i = 0; i < SBUS_CHANNEL_DATA_LENGTH; i++)
+	for (int i = 0; i < count; i++)
 	{
-		channelData[i] = (5 * sbusChannelData[i] / 8) + 880;
+		if (i < SBUS_MAX_CHANNEL)
+		{
+			channelData[i] = (5 * sbusChannelData[i] / 8) + 880;
+		}
+		else
+		{
+			channelData[i] = 1500;
+		}
 	}
 }

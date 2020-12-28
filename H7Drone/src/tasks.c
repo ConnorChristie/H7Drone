@@ -3,7 +3,7 @@
 
 #include "imu.h"
 #include "flight.h"
-#include "motors/dshot.h"
+#include "motors.h"
 #include "control.h"
 #include "pid.h"
 
@@ -55,7 +55,7 @@ task_t tasks[TASK_COUNT] = {
 
 	[TASK_FLIGHT] = DEFINE_TASK("FLIGHT", NULL, NULL, flightUpdate, TASK_PERIOD_US(10000), TASK_PRIORITY_HIGH),
 	[TASK_RX] = DEFINE_TASK("RX", NULL, rxUpdateCheck, taskUpdateRxMain, TASK_PERIOD_HZ(33), TASK_PRIORITY_HIGH),
-	[TASK_DSHOT] = DEFINE_TASK("DSHOT", NULL, NULL, writeMotors, TASK_PERIOD_US(100), TASK_PRIORITY_REALTIME),
+	[TASK_DSHOT] = DEFINE_TASK("DSHOT", NULL, NULL, motorsUpdate, TASK_PERIOD_US(100), TASK_PRIORITY_REALTIME),
 };
 
 task_t* getTask(uint8_t taskId)

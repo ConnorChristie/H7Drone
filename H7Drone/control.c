@@ -4,10 +4,8 @@
 #include "sbus.h"
 
 FAST_DATA_ZERO_INIT bool armed;
-FAST_DATA_ZERO_INIT float throttle;
-FAST_DATA_ZERO_INIT vector3f_t setpoints;
-
-FAST_DATA_ZERO_INIT float channelData[MAX_CHANNEL_COUNT];
+FAST_DATA_ZERO_INIT float setpoints[CONTROL_ITEM_COUNT];
+FAST_DATA_ZERO_INIT float controlData[MAX_CHANNEL_COUNT];
 
 static controlVtable_t controlVTable;
 
@@ -22,13 +20,15 @@ void initControl(void)
 
 void taskUpdateRxMain(timeUs_t currentTimeUs)
 {
-	controlVTable.readRawRc(&channelData[0]);
+	controlVTable.readRawRc(&controlData[0], MAX_CHANNEL_COUNT);
 
 	// Current controller is setup for TAER
-	setThrottle(channelData[0]);
-	updateSetpointRate(CONTROL_ROLL, channelData[1]);
-	updateSetpointRate(CONTROL_PITCH, channelData[2]);
-	updateSetpointRate(CONTROL_YAW, channelData[3]);
+	updateSetpointRate(CONTROL_THROTTLE, controlData[0]);
+	updateSetpointRate(CONTROL_ROLL, controlData[1]);
+	updateSetpointRate(CONTROL_PITCH, controlData[2]);
+	updateSetpointRate(CONTROL_YAW, controlData[3]);
+
+	setArmed(controlData[6] >= 1500);
 }
 
 bool rxUpdateCheck(timeUs_t currentTimeUs, timeDelta_t currentDeltaTimeUs)
@@ -54,27 +54,20 @@ bool isArmed(void)
 
 void setArmed(bool isArmed)
 {
-	if (throttle == 0 && isArmed)
+	if (armed == isArmed) return;
+
+	if (getSetpointRate(CONTROL_THROTTLE) <= -1.0f && isArmed)
 	{
 		armed = true;
+		return;
 	}
 
 	armed = false;
 }
 
-float getThrottle(void)
-{
-	return throttle;
-}
-
-void setThrottle(float value)
-{
-	throttle = value;
-}
-
 float getSetpointRate(int axis)
 {
-	return setpoints.xyz[axis];
+	return setpoints[axis];
 }
 
 void updateSetpointRate(int axis, float setpoint)
@@ -82,5 +75,5 @@ void updateSetpointRate(int axis, float setpoint)
 	float rcCommandf = setpoint - 1500;
 	rcCommandf = rcCommandf / 500.0f;
 
-	setpoints.xyz[axis] = rcCommandf;
+	setpoints[axis] = rcCommandf;
 }

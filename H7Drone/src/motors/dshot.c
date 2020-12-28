@@ -4,12 +4,7 @@
 #include "dma.h"
 #include "nvic.h"
 
-#define MAX_SUPPORTED_MOTORS 4
-
 DMA_RAM u32 dshotOutputBuffer[MAX_SUPPORTED_MOTORS][DSHOT_DMA_BUFFER_SIZE];
-
-FAST_DATA_ZERO_INIT u16 motorValues[MAX_SUPPORTED_MOTORS];
- motorInstance_t motors[MAX_SUPPORTED_MOTORS];
 
 u16 prepareDshotPacket(u16 value);
 static u8 loadDmaBufferDshot(u32 *dmaBuffer, int stride, u16 packet);
@@ -28,7 +23,7 @@ FAST_CODE void dshotWriteInt(u8 id, u16 value)
 	const motorInstance_t *motor = &motors[id];
 	const dmaChannelDescriptor_t *dma = dmaGetDescriptorByIdentifier(motor->dma);
 
-	u16 packet = prepareDshotPacket(cnt);
+	u16 packet = prepareDshotPacket(value);
 	u8 bufferSize = loadDmaBufferDshot((u32 *)&dshotOutputBuffer[id][0], 1, packet);
 
 	LL_DMA_SetDataLength(dma->instance.dma, dma->instance.stream, bufferSize);
@@ -51,7 +46,7 @@ FAST_CODE void dshotUpdateComplete()
 	}
 }
 
-FAST_CODE void dshotWriteAllMotors(u16 *values)
+FAST_CODE void dshotWriteMotors(u16 *values)
 {
 	for (u8 i = 0; i < MAX_SUPPORTED_MOTORS; i++)
 	{
@@ -59,33 +54,6 @@ FAST_CODE void dshotWriteAllMotors(u16 *values)
 	}
 
 	dshotUpdateComplete();
-}
-
-FAST_CODE void writeMotors(timeUs_t currentTimeUs)
-{
-	motorValues[0] = cnt;
-	motorValues[1] = 200 - cnt;
-	motorValues[2] = cnt;
-	motorValues[3] = 200 - cnt;
-	
-	dshotWriteAllMotors(motorValues);
-
-	timeDelta_t delta = currentTimeUs - lastTime;
-
-	if (delta >= 20000)
-	{
-		lastTime = currentTimeUs;
-		cnt++;
-		if (cnt >= 200) {
-			cnt = 0;
-		}
-	}
-}
-
-void stopMotors(void)
-{
-	dshotWriteAllMotors(0);
-	delay(50);  // give the timers and ESCs a chance to react.
 }
 
 static void motor_DMA_IRQHandler(dmaChannelDescriptor_t* descriptor)
@@ -109,40 +77,40 @@ static void motor_DMA_IRQHandler(dmaChannelDescriptor_t* descriptor)
 #define MOTOR_DSHOT300_HZ     MHZ_TO_HZ(6)
 #define MOTOR_DSHOT150_HZ     MHZ_TO_HZ(3)
 
-void dshotInit(u8 id, motorInstance_t motor)
+void dshotInit(u8 id, motorInstance_t *motor)
 {
-	dmaChannelDescriptor_t *dma = dmaGetDescriptorByIdentifier(motor.dma);
+	dmaChannelDescriptor_t *dma = dmaGetDescriptorByIdentifier(motor->dma);
 
-	switch (motor.timer.channel) {
-	case TIM_CHANNEL_1: motor.timer.llChannel = LL_TIM_CHANNEL_CH1; break;
-	case TIM_CHANNEL_2: motor.timer.llChannel = LL_TIM_CHANNEL_CH2; break;
-	case TIM_CHANNEL_3: motor.timer.llChannel = LL_TIM_CHANNEL_CH3; break;
-	case TIM_CHANNEL_4: motor.timer.llChannel = LL_TIM_CHANNEL_CH4; break;
+	switch (motor->timer.channel) {
+	case TIM_CHANNEL_1: motor->timer.llChannel = LL_TIM_CHANNEL_CH1; break;
+	case TIM_CHANNEL_2: motor->timer.llChannel = LL_TIM_CHANNEL_CH2; break;
+	case TIM_CHANNEL_3: motor->timer.llChannel = LL_TIM_CHANNEL_CH3; break;
+	case TIM_CHANNEL_4: motor->timer.llChannel = LL_TIM_CHANNEL_CH4; break;
 	}
 
 	GPIO_InitTypeDef GPIO_InitStruct;
-	GPIO_InitStruct.Pin = motor.timer.pin;
+	GPIO_InitStruct.Pin = motor->timer.pin;
 	GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
 	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
 	GPIO_InitStruct.Pull = GPIO_PULLUP;
-	GPIO_InitStruct.Alternate = motor.timer.alternateFunction;
-	HAL_GPIO_Init(motor.timer.pinPack, &GPIO_InitStruct);
+	GPIO_InitStruct.Alternate = motor->timer.alternateFunction;
+	HAL_GPIO_Init(motor->timer.pinPack, &GPIO_InitStruct);
 
-	if (!isDmaTimerConfigured(motor.timer.instance))
+	if (!isDmaTimerConfigured(motor->timer.instance))
 	{
-		RCC_ClockCmd(timerRCC(motor.timer.instance), ENABLE);
-		LL_TIM_DisableCounter(motor.timer.instance);
-		LL_TIM_DeInit(motor.timer.instance);
+		RCC_ClockCmd(timerRCC(motor->timer.instance), ENABLE);
+		LL_TIM_DisableCounter(motor->timer.instance);
+		LL_TIM_DeInit(motor->timer.instance);
 
 		LL_TIM_InitTypeDef TIM_TimeBaseStructure;
 		LL_TIM_StructInit(&TIM_TimeBaseStructure);
 
-		TIM_TimeBaseStructure.Prescaler = (u16)(lrintf((float) timerClock(motor.timer.instance) / MOTOR_DSHOT600_HZ + 0.01f) - 1);
+		TIM_TimeBaseStructure.Prescaler = (u16)(lrintf((float) timerClock(motor->timer.instance) / MOTOR_DSHOT600_HZ + 0.01f) - 1);
 		TIM_TimeBaseStructure.Autoreload = MOTOR_BITLENGTH - 1;
 		TIM_TimeBaseStructure.ClockDivision = LL_TIM_CLOCKDIVISION_DIV1;
 		TIM_TimeBaseStructure.RepetitionCounter = 0;
 		TIM_TimeBaseStructure.CounterMode = LL_TIM_COUNTERMODE_UP;
-		LL_TIM_Init(motor.timer.instance, &TIM_TimeBaseStructure);
+		LL_TIM_Init(motor->timer.instance, &TIM_TimeBaseStructure);
 	}
 
 	LL_DMA_DisableStream(dma->instance.dma, dma->instance.stream);
@@ -152,7 +120,7 @@ void dshotInit(u8 id, motorInstance_t motor)
 		LL_DMA_InitTypeDef DMA_InitStructure;
 		LL_DMA_StructInit(&DMA_InitStructure);
 
-		DMA_InitStructure.PeriphRequest = motor.dmaChannel;
+		DMA_InitStructure.PeriphRequest = motor->dmaChannel;
 		DMA_InitStructure.MemoryOrM2MDstAddress = (u32)&dshotOutputBuffer[id][0];
 		DMA_InitStructure.Direction = LL_DMA_DIRECTION_MEMORY_TO_PERIPH;
 		DMA_InitStructure.FIFOMode = LL_DMA_FIFOMODE_ENABLE;
@@ -160,7 +128,7 @@ void dshotInit(u8 id, motorInstance_t motor)
 		DMA_InitStructure.MemBurst = LL_DMA_MBURST_SINGLE;
 		DMA_InitStructure.PeriphBurst = LL_DMA_PBURST_SINGLE;
 
-		DMA_InitStructure.PeriphOrM2MSrcAddress = (u32)((volatile char*)&motor.timer.instance->CCR1 + motor.timer.channel);
+		DMA_InitStructure.PeriphOrM2MSrcAddress = (u32)((volatile char*)&motor->timer.instance->CCR1 + motor->timer.channel);
 		DMA_InitStructure.NbData = DSHOT_DMA_BUFFER_SIZE;
 		DMA_InitStructure.PeriphOrM2MSrcIncMode = LL_DMA_PERIPH_NOINCREMENT;
 		DMA_InitStructure.MemoryOrM2MDstIncMode = LL_DMA_MEMORY_INCREMENT;
@@ -169,7 +137,7 @@ void dshotInit(u8 id, motorInstance_t motor)
 		DMA_InitStructure.Mode = LL_DMA_MODE_NORMAL;
 		DMA_InitStructure.Priority = LL_DMA_PRIORITY_HIGH;
 
-		dmaSetHandler(motor.dma, motor_DMA_IRQHandler, NVIC_PRIO_DSHOT_DMA, id);
+		dmaSetHandler(motor->dma, motor_DMA_IRQHandler, NVIC_PRIO_DSHOT_DMA, id);
 
 		LL_DMA_Init(dma->instance.dma, dma->instance.stream, &DMA_InitStructure);
 		LL_DMA_EnableIT_TC(dma->instance.dma, dma->instance.stream);
@@ -184,21 +152,19 @@ void dshotInit(u8 id, motorInstance_t motor)
 	TIM_OCInitStructure.OCPolarity =  LL_TIM_OCPOLARITY_HIGH;
 	TIM_OCInitStructure.CompareValue = 0;
 
-	LL_TIM_OC_Init(motor.timer.instance, motor.timer.llChannel, &TIM_OCInitStructure);
-	LL_TIM_OC_EnablePreload(motor.timer.instance, motor.timer.llChannel);
-	LL_TIM_OC_DisableFast(motor.timer.instance, motor.timer.llChannel);
+	LL_TIM_OC_Init(motor->timer.instance, motor->timer.llChannel, &TIM_OCInitStructure);
+	LL_TIM_OC_EnablePreload(motor->timer.instance, motor->timer.llChannel);
+	LL_TIM_OC_DisableFast(motor->timer.instance, motor->timer.llChannel);
 
-	LL_TIM_CC_EnableChannel(motor.timer.instance, motor.timer.llChannel);
+	LL_TIM_CC_EnableChannel(motor->timer.instance, motor->timer.llChannel);
 
-	LL_TIM_EnableAllOutputs(motor.timer.instance);
-	LL_TIM_EnableARRPreload(motor.timer.instance);
-	LL_TIM_EnableCounter(motor.timer.instance);
+	LL_TIM_EnableAllOutputs(motor->timer.instance);
+	LL_TIM_EnableARRPreload(motor->timer.instance);
+	LL_TIM_EnableCounter(motor->timer.instance);
 
-	motor.timerDmaSource = timerDmaSource(motor.timer.channel);
-	motor.dmaTimer = getDmaTimer(motor.timer.instance);
-	motor.dmaTimer->outputPeriod = MOTOR_BITLENGTH - 1;
-
-	motors[id] = motor;
+	motor->timerDmaSource = timerDmaSource(motor->timer.channel);
+	motor->dmaTimer = getDmaTimer(motor->timer.instance);
+	motor->dmaTimer->outputPeriod = MOTOR_BITLENGTH - 1;
 }
 
 u16 prepareDshotPacket(u16 value)
