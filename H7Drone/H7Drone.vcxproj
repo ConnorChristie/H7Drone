@@ -73,11 +73,7 @@
   </ImportGroup>
   <ItemGroup />
   <ItemGroup>
-    <ClCompile Include="control.c" />
-    <ClCompile Include="motors.c" />
-    <ClCompile Include="pid.c" />
-    <ClCompile Include="sbus.c" />
-    <ClCompile Include="serial_uart.c" />
+    <ClCompile Include="src\control.c" />
     <ClCompile Include="src\dma.c" />
     <ClCompile Include="src\drivers\icm20602.c" />
     <ClCompile Include="src\drivers\mpu6000.c" />
@@ -87,9 +83,13 @@
     <ClCompile Include="src\main.c" />
     <ClCompile Include="src\maths.c" />
     <ClCompile Include="src\memprot.c" />
+    <ClCompile Include="src\motors.c" />
     <ClCompile Include="src\motors\dshot.c" />
+    <ClCompile Include="src\pid.c" />
     <ClCompile Include="src\rcc.c" />
+    <ClCompile Include="src\sbus.c" />
     <ClCompile Include="src\scheduler.c" />
+    <ClCompile Include="src\serial_uart.c" />
     <ClCompile Include="src\spi.c" />
     <ClCompile Include="src\system.c" />
     <ClCompile Include="src\system_stm32h7xx.c" />
@@ -216,13 +216,8 @@
     <ClCompile Include="$(BSP_ROOT)\STM32H7xxxx\STM32H7xx_HAL_Driver\Src\stm32h7xx_ll_tim.c" />
     <ClCompile Include="$(BSP_ROOT)\STM32H7xxxx\STM32H7xx_HAL_Driver\Src\stm32h7xx_ll_usart.c" />
     <ClCompile Include="$(BSP_ROOT)\STM32H7xxxx\STM32H7xx_HAL_Driver\Src\stm32h7xx_ll_utils.c" />
-    <ClInclude Include="control.h" />
-    <ClInclude Include="motors.h" />
-    <ClInclude Include="nvic.h" />
-    <ClInclude Include="pid.h" />
-    <ClInclude Include="sbus.h" />
-    <ClInclude Include="serial_uart.h" />
     <ClInclude Include="src\accgyro_mpu.h" />
+    <ClInclude Include="src\control.h" />
     <ClInclude Include="src\dma.h" />
     <ClInclude Include="src\drivers\icm20602.h" />
     <ClInclude Include="src\drivers\mpu6000.h" />
@@ -231,10 +226,15 @@
     <ClInclude Include="src\imu.h" />
     <ClInclude Include="src\maths.h" />
     <ClInclude Include="src\memprot.h" />
+    <ClInclude Include="src\motors.h" />
     <ClInclude Include="src\motors\dshot.h" />
+    <ClInclude Include="src\nvic.h" />
+    <ClInclude Include="src\pid.h" />
     <ClInclude Include="src\platform.h" />
     <ClInclude Include="src\rcc.h" />
+    <ClInclude Include="src\sbus.h" />
     <ClInclude Include="src\scheduler.h" />
+    <ClInclude Include="src\serial_uart.h" />
     <ClInclude Include="src\spi.h" />
     <ClInclude Include="src\system.h" />
     <ClInclude Include="src\tasks.h" />

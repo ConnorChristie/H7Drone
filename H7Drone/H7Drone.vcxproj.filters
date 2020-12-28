@@ -43,9 +43,6 @@
     <Filter Include="Header files\Device-specific files\Semihosting/Profiler">
       <UniqueIdentifier>{b43a0691-4b95-4733-b718-26506bd2ded3}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header files\rx">
-      <UniqueIdentifier>{ea72725d-be3d-4f4c-bee2-316ed231e304}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header files\motors">
       <UniqueIdentifier>{8c4bd977-2cc1-471a-b982-affbdb5e89be}</UniqueIdentifier>
     </Filter>
@@ -54,9 +51,6 @@
     </Filter>
     <Filter Include="Header files\drivers">
       <UniqueIdentifier>{6576daac-49d2-4bca-863f-0f43d067d646}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source files\rx">
-      <UniqueIdentifier>{b7200c55-540c-48e6-bb2f-5722c59fb7ec}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source files\drivers">
       <UniqueIdentifier>{33ae9391-90db-4f92-ad36-4e5ab41766ed}</UniqueIdentifier>
@@ -72,6 +66,12 @@
     </Filter>
     <Filter Include="Header files\core">
       <UniqueIdentifier>{c28ff200-f979-44dd-97f2-40bb0c4178f6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\rc">
+      <UniqueIdentifier>{ea72725d-be3d-4f4c-bee2-316ed231e304}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\rc">
+      <UniqueIdentifier>{b7200c55-540c-48e6-bb2f-5722c59fb7ec}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -978,9 +978,6 @@
     <ClInclude Include="src\drivers\icm20602.h">
       <Filter>Header files\drivers</Filter>
     </ClInclude>
-    <ClInclude Include="sbus.h">
-      <Filter>Header files\rx</Filter>
-    </ClInclude>
     <ClInclude Include="src\motors\dshot.h">
       <Filter>Header files\motors</Filter>
     </ClInclude>
@@ -1011,9 +1008,6 @@
     <ClInclude Include="src\platform.h">
       <Filter>Header files\core</Filter>
     </ClInclude>
-    <ClInclude Include="nvic.h">
-      <Filter>Header files\core</Filter>
-    </ClInclude>
     <ClInclude Include="src\memprot.h">
       <Filter>Header files\core</Filter>
     </ClInclude>
@@ -1026,20 +1020,26 @@
     <ClInclude Include="src\spi.h">
       <Filter>Header files\core</Filter>
     </ClInclude>
-    <ClInclude Include="serial_uart.h">
-      <Filter>Header files\core</Filter>
-    </ClInclude>
     <ClInclude Include="src\accgyro_mpu.h">
       <Filter>Header files\drivers</Filter>
     </ClInclude>
-    <ClInclude Include="pid.h">
+    <ClInclude Include="src\serial_uart.h">
+      <Filter>Header files\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\control.h">
+      <Filter>Header files\rc</Filter>
+    </ClInclude>
+    <ClInclude Include="src\sbus.h">
+      <Filter>Header files\rc</Filter>
+    </ClInclude>
+    <ClInclude Include="src\pid.h">
       <Filter>Header files\flight</Filter>
     </ClInclude>
-    <ClInclude Include="control.h">
-      <Filter>Header files\flight</Filter>
-    </ClInclude>
-    <ClInclude Include="motors.h">
+    <ClInclude Include="src\motors.h">
       <Filter>Header files\motors</Filter>
+    </ClInclude>
+    <ClInclude Include="src\nvic.h">
+      <Filter>Header files\core</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1066,9 +1066,6 @@
     </ClCompile>
     <ClCompile Include="src\drivers\mpu9250.c">
       <Filter>Source files\drivers</Filter>
-    </ClCompile>
-    <ClCompile Include="sbus.c">
-      <Filter>Source files\rx</Filter>
     </ClCompile>
     <ClCompile Include="src\maths.c">
       <Filter>Source files\core</Filter>
@@ -1097,17 +1094,20 @@
     <ClCompile Include="src\spi.c">
       <Filter>Source files\core</Filter>
     </ClCompile>
-    <ClCompile Include="serial_uart.c">
-      <Filter>Source files\core</Filter>
+    <ClCompile Include="src\control.c">
+      <Filter>Source files\rc</Filter>
     </ClCompile>
-    <ClCompile Include="pid.c">
+    <ClCompile Include="src\sbus.c">
+      <Filter>Source files\rc</Filter>
+    </ClCompile>
+    <ClCompile Include="src\pid.c">
       <Filter>Source files\flight</Filter>
     </ClCompile>
-    <ClCompile Include="control.c">
-      <Filter>Source files\flight</Filter>
-    </ClCompile>
-    <ClCompile Include="motors.c">
+    <ClCompile Include="src\motors.c">
       <Filter>Source files\motors</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serial_uart.c">
+      <Filter>Source files\core</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
