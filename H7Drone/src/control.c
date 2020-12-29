@@ -1,5 +1,6 @@
 #include "control.h"
 #include "maths.h"
+#include "pid.h"
 
 #include "sbus.h"
 
@@ -56,9 +57,12 @@ void setArmed(bool isArmed)
 {
 	if (armed == isArmed) return;
 
-	if (getSetpointRate(CONTROL_THROTTLE) <= -1.0f && isArmed)
+	if (getSetpointRate(CONTROL_THROTTLE) <= -666.0f && isArmed)
 	{
 		armed = true;
+
+		pidReset();
+
 		return;
 	}
 
@@ -75,5 +79,5 @@ void updateSetpointRate(int axis, float setpoint)
 	float rcCommandf = setpoint - 1500;
 	rcCommandf = rcCommandf / 500.0f;
 
-	setpoints[axis] = rcCommandf;
+	setpoints[axis] = rcCommandf * 666.0f;
 }

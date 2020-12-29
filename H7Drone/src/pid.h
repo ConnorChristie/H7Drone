@@ -15,6 +15,10 @@ typedef struct
 {
 	/* Integrator limits */
 	float itermLimit;
+	/* Sample time (in seconds) */
+	float T;
+	/* Derivative low-pass filter time constant */
+	float tau;
 } pidRuntime_t;
 
 typedef struct
@@ -24,26 +28,23 @@ typedef struct
 	float Ki;
 	float Kd;
 
-	/* Derivative low-pass filter time constant */
-	float tau;
-
 	/* Output limits */
-	float limMin;
-	float limMax;
+	float pidSumLimit;
 
-	/* Sample time (in seconds) */
-	float T;
+	float P;
+	float I;
+	float D;
 
-	/* Controller "memory" */
-	float integrator;
-	float prevError; /* Required for integrator */
+	float prevError;
 	float differentiator;
-	float prevMeasurement; /* Required for differentiator */
+	float prevMeasurement;
 
-	float sum;
+	float output;
 } pidData_t;
 
 extern pidData_t pidData[PID_ITEM_COUNT];
 
 void pidInit(void);
 void pidUpdate(timeUs_t currentTimeUs);
+void pidReset(void);
+void pidResetITerm(void);

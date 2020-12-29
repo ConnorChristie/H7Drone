@@ -1,6 +1,8 @@
 #include "motors.h"
 #include "system.h"
 #include "control.h"
+#include "maths.h"
+#include "pid.h"
 
 #include "motors/dshot.h"
 
@@ -66,13 +68,72 @@ void initMotors(void)
 
 void motorsUpdate(timeUs_t currentTimeUs)
 {
+	// 0 - 2047
+
+	static float mixer[MAX_SUPPORTED_MOTORS][PID_ITEM_COUNT];
+
+	mixer[0][PID_ROLL] = -1;
+	mixer[1][PID_ROLL] = -1;
+	mixer[2][PID_ROLL] = 1;
+	mixer[3][PID_ROLL] = 1;
+
+	mixer[0][PID_PITCH] = 1;
+	mixer[1][PID_PITCH] = -1;
+	mixer[2][PID_PITCH] = 1;
+	mixer[3][PID_PITCH] = -1;
+
+	mixer[0][PID_YAW] = -1;
+	mixer[1][PID_YAW] = 1;
+	mixer[2][PID_YAW] = 1;
+	mixer[3][PID_YAW] = -1;
+
 	if (isArmed())
 	{
-		motorValues[0] = getSetpointRate(CONTROL_THROTTLE) * 500 + 500;
+		float throttle = (getSetpointRate(CONTROL_THROTTLE) + 666.0f) / (666.0f * 2.0f);
+
+		const float scaledAxisPidRoll = pidData[PID_ROLL].output / 1000.0f;
+		const float scaledAxisPidPitch = pidData[PID_PITCH].output / 1000.0f;
+		const float scaledAxisPidYaw = pidData[PID_YAW].output / 1000.0f;
+
+		float motorMix[MAX_SUPPORTED_MOTORS];
+		float motorMixMax = 0, motorMixMin = 0;
+
+		for (int i = 0; i < MAX_SUPPORTED_MOTORS; i++)
+		{
+			float mix =
+				mixer[i][PID_ROLL] * scaledAxisPidRoll +
+				mixer[i][PID_PITCH] * scaledAxisPidPitch +
+				mixer[i][PID_YAW] * scaledAxisPidYaw;
+
+			if (mix > motorMixMax)
+			{
+				motorMixMax = mix;
+			}
+			else if (mix < motorMixMin)
+			{
+				motorMixMin = mix;
+			}
+
+			motorMix[i] = mix;
+		}
+
+		throttle = constrainf(throttle, -motorMixMin, 1.0f - motorMixMax);
+
+		for (int i = 0; i < MAX_SUPPORTED_MOTORS; i++)
+		{
+			float motorOutput = motorMix[i] + throttle;
+			motorOutput = 158.0f + 1889.0f * motorOutput;
+			motorOutput = constrain(motorOutput, 158, 2047);
+
+			motorValues[i] = motorOutput;
+		}
 	}
 	else
 	{
-		motorValues[0] = 0;
+		for (int i = 0; i < MAX_SUPPORTED_MOTORS; i++)
+		{
+			motorValues[i] = 0;
+		}
 	}
 
 	motorsVtable.writeMotors(motorValues);
@@ -85,7 +146,7 @@ void stopMotors(void)
 		motorValues[i] = 0;
 	}
 
-	motorsUpdate(0);
+	motorsVtable.writeMotors(motorValues);
 
 	// give the timers and ESCs a chance to react.
 	delay(50);
