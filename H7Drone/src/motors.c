@@ -89,11 +89,11 @@ void motorsUpdate(timeUs_t currentTimeUs)
 
 	if (isArmed())
 	{
-		float throttle = (getSetpointRate(CONTROL_THROTTLE) + 666.0f) / (666.0f * 2.0f);
+		float throttle = getSetpointRate(CONTROL_THROTTLE);
 
-		const float scaledAxisPidRoll = pidData[PID_ROLL].output / 1000.0f;
-		const float scaledAxisPidPitch = pidData[PID_PITCH].output / 1000.0f;
-		const float scaledAxisPidYaw = pidData[PID_YAW].output / 1000.0f;
+		const float scaledAxisPidRoll = pidData[PID_ROLL].output;
+		const float scaledAxisPidPitch = pidData[PID_PITCH].output;
+		const float scaledAxisPidYaw = pidData[PID_YAW].output;
 
 		float motorMix[MAX_SUPPORTED_MOTORS];
 		float motorMixMax = 0, motorMixMin = 0;
@@ -137,17 +137,4 @@ void motorsUpdate(timeUs_t currentTimeUs)
 	}
 
 	motorsVtable.writeMotors(motorValues);
-}
-
-void stopMotors(void)
-{
-	for (int i = 0; i < MAX_SUPPORTED_MOTORS; i++)
-	{
-		motorValues[i] = 0;
-	}
-
-	motorsVtable.writeMotors(motorValues);
-
-	// give the timers and ESCs a chance to react.
-	delay(50);
 }

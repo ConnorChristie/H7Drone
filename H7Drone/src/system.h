@@ -80,6 +80,7 @@ u32 micros(void);
 u32 microsISR(void);
 void delayMicroseconds(u32 us);
 void delay(u32 ms);
+u32 millis(void);
 
 // IO
 int GPIOPinIdx(u16 pin);

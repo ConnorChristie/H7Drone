@@ -3,13 +3,13 @@
 #include "nvic.h"
 
 // cycles per microsecond
-static uint32_t usTicks = 0;
+static u32 usTicks = 0;
 // current uptime for 1kHz systick timer. will rollover after 49 days. hopefully we won't care.
-static volatile uint32_t sysTickUptime = 0;
-static volatile uint32_t sysTickValStamp = 0;
+static volatile u32 sysTickUptime = 0;
+static volatile u32 sysTickValStamp = 0;
 // cached value of RCC->CSR
-uint32_t cachedRccCsrValue;
-static uint32_t cpuClockFrequency = 0;
+u32 cachedRccCsrValue;
+static u32 cpuClockFrequency = 0;
 
 void cycleCounterInit(void)
 {
@@ -29,7 +29,7 @@ void cycleCounterInit(void)
 #elif defined(STM32F3) || defined(STM32F4)
 	// Note: DWT_Type does not contain LAR member.
 #define DWT_LAR
-	__O uint32_t *DWTLAR = (uint32_t *)(DWT_BASE + 0x0FB0);
+	__O u32 *DWTLAR = (u32 *)(DWT_BASE + 0x0FB0);
 	*(DWTLAR) = 0xC5ACCE55;
 #endif
 
@@ -55,9 +55,9 @@ void SysTick_Handler(void)
 
 // Return system uptime in microseconds (rollover in 70minutes)
 
-uint32_t microsISR(void)
+u32 microsISR(void)
 {
-	register uint32_t ms, pending, cycle_cnt;
+	register u32 ms, pending, cycle_cnt;
 
 	ATOMIC_BLOCK(NVIC_PRIO_MAX)
 	{
@@ -84,9 +84,9 @@ uint32_t microsISR(void)
 	return ((ms + pending) * 1000) + (usTicks * 1000 - cycle_cnt) / usTicks;
 }
 
-uint32_t micros(void)
+u32 micros(void)
 {
-	register uint32_t ms, cycle_cnt;
+	register u32 ms, cycle_cnt;
 
 	// Call microsISR() in interrupt and elevated (non-zero) BASEPRI context
 
@@ -104,19 +104,24 @@ uint32_t micros(void)
 	return (ms * 1000) + (usTicks * 1000 - cycle_cnt) / usTicks;
 }
 
-void delayMicroseconds(uint32_t us)
+void delayMicroseconds(u32 us)
 {
-	uint32_t startUs = micros();
+	u32 startUs = micros();
 
 	while (micros() - startUs < us) ;
 }
 
-void delay(uint32_t ms)
+void delay(u32 ms)
 {
 	while (ms--)
 	{
 		delayMicroseconds(1000);
 	}
+}
+
+u32 millis(void)
+{
+	return sysTickUptime;
 }
 
 interruptContext_t irqContexts[7];

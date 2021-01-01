@@ -3,12 +3,18 @@
 #include "system.h"
 #include "memprot.h"
 #include "scheduler.h"
+#include "nvic.h"
 #include "rcc.h"
 #include "imu.h"
 #include "dma.h"
 #include "control.h"
 #include "motors.h"
 #include "pid.h"
+
+#include "usbd_cdc.h"
+#include "usbd_core.h"
+#include "usbd_desc.h"
+#include "usbd_cdc_if.h"
 
 static void SPI1_Init(void);
 static void SPI4_Init(void);
@@ -20,6 +26,34 @@ void initMotors(void);
 GPIO_InitTypeDef GPIO_InitStructure;
 
 void run(void);
+
+
+USBD_HandleTypeDef hUsbDeviceFS;
+
+void MX_USB_DEVICE_Init(void)
+{
+	/* Init Device Library, add supported class and start the library. */
+	if (USBD_Init(&hUsbDeviceFS, &FS_Desc, DEVICE_FS) != USBD_OK)
+	{
+		Error_Handler();
+	}
+	if (USBD_RegisterClass(&hUsbDeviceFS, &USBD_CDC) != USBD_OK)
+	{
+		Error_Handler();
+	}
+	if (USBD_CDC_RegisterInterface(&hUsbDeviceFS, &USBD_Interface_fops_FS) != USBD_OK)
+	{
+		Error_Handler();
+	}
+	if (USBD_Start(&hUsbDeviceFS) != USBD_OK)
+	{
+		Error_Handler();
+	}
+
+	HAL_PWREx_EnableUSBVoltageDetector();
+	delay(100);
+}
+
 
 int main(void)
 {
@@ -72,8 +106,8 @@ int main(void)
 	RCC->PLL2DIVR = 0x00000000;
 
 	/* Reset PLL2FRACR register */
-
 	RCC->PLL2FRACR = 0x00000000;
+
 	/* Reset PLL3DIVR register */
 	RCC->PLL3DIVR = 0x00000000;
 
@@ -86,7 +120,7 @@ int main(void)
 	/* Disable all interrupts */
 	RCC->CIER = 0x00000000;
 
-	/* Change  the switch matrix read issuing capability to 1 for the AXI SRAM target (Target 7) */
+	/* Change the switch matrix read issuing capability to 1 for the AXI SRAM target (Target 7) */
 	*((__IO uint32_t*)0x51008108) = 0x00000001;
 
 	SCB->VTOR = FLASH_BANK1_BASE | VECT_TAB_OFFSET; /* Vector Table Relocation in Internal FLASH */
@@ -112,17 +146,23 @@ int main(void)
 	__HAL_RCC_GPIOG_CLK_ENABLE();
 	__HAL_RCC_GPIOH_CLK_ENABLE();
 
-	cycleCounterInit();
+	HAL_NVIC_SetPriorityGrouping(NVIC_PRIORITY_GROUPING);
 
+	__HAL_RCC_D2SRAM1_CLK_ENABLE();
+	__HAL_RCC_D2SRAM2_CLK_ENABLE();
+	__HAL_RCC_D2SRAM3_CLK_ENABLE();
+
+	cycleCounterInit();
+	schedulerInit();
+	schedulerSetCalulateTaskStatistics(true);
+	setTaskEnabled(TASK_COMPASS, false);
+
+	MX_USB_DEVICE_Init();
 	SPI1_Init();
 	//SPI4_Init();
 	initMotors();
 	initControl();
 	pidInit();
-
-	schedulerInit();
-	schedulerSetCalulateTaskStatistics(true);
-	setTaskEnabled(TASK_COMPASS, false);
 
 	// LED
 	GPIO_InitStructure.Pin = GPIO_PIN_3;
@@ -284,7 +324,7 @@ static void SPI4_Init(void)
 	imuInit(spi, 1, CW0_DEG_FLIP);
 }
 
-static void Error_Handler(void)
+void Error_Handler(void)
 {
 	while (1) ;
 }

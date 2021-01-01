@@ -6,6 +6,8 @@
 #include "drivers/mpu6000.h"
 #include "drivers/icm20602.h"
 
+#include "usbd_cdc_if.h"
+
 FAST_DATA_ZERO_INIT imuData_t imuData;
 u8 imuDeviceCount = 0;
 static imuDev_t *imuDevices = NULL;
@@ -101,8 +103,28 @@ void imuUpdateGyroReadings(void)
 	}
 }
 
+static void usbVcpWriteBuf(const void *data, int count)
+{
+	u32 start = millis();
+	const u8 *p = data;
+
+	while (count > 0)
+	{
+		u8 txed = CDC_Transmit_FS(p, count);
+		count -= txed;
+		p += txed;
+
+		if (millis() - start > USB_TIMEOUT)
+		{
+			break;
+		}
+	}
+}
+
 void imuFilterGyro(timeUs_t currentTimeUs)
 {
+	uint8_t buffer[] = "Hello, World!\r\n";
+	CDC_Transmit_FS(buffer, sizeof(buffer));
 }
 
 void imuUpdateAccelReadings(void)

@@ -26,6 +26,7 @@ typedef struct
 	void (*init)(void);
 	void (*readRawRc)(float *channelData, int count);
 	u8 (*readStatus)(void);
+	float (*applyRates)(const int index, float rcCommandf, const float rcCommandfAbs);
 } controlVtable_t;
 
 extern float controlData[MAX_CHANNEL_COUNT];
@@ -35,11 +36,8 @@ void initControl(void);
 bool rxUpdateCheck(timeUs_t currentTimeUs, timeDelta_t currentDeltaTimeUs);
 void taskUpdateRxMain(timeUs_t currentTimeUs);
 
+bool isThrottleDown(void);
 bool isArmed(void);
 void setArmed(bool isArmed);
 
-float getThrottle(void);
-void setThrottle(float value);
-
 float getSetpointRate(int axis);
-void updateSetpointRate(int axis, float setpoint);

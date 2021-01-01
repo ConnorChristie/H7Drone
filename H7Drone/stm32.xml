@@ -38,12 +38,21 @@
   <ReferencedFrameworks>
     <string>com.sysprogs.arm.stm32.hal</string>
     <string>com.sysprogs.arm.stm32.ll</string>
+    <string>com.sysprogs.arm.stm32.usbdev</string>
     <string>com.sysprogs.embedded.semihosting_and_profiler</string>
   </ReferencedFrameworks>
   <FrameworkProperties>
     <Entries>
       <KeyValue>
         <Key>com.sysprogs.bspoptions.stm32.ll_driver</Key>
+      </KeyValue>
+      <KeyValue>
+        <Key>com.sysprogs.bspoptions.stm32.usb.devclass</Key>
+        <Value>CDC</Value>
+      </KeyValue>
+      <KeyValue>
+        <Key>com.sysprogs.bspoptions.stm32.usb.speed</Key>
+        <Value>FS</Value>
       </KeyValue>
       <KeyValue>
         <Key>com.sysprogs.efp.semihosting.buffer_size</Key>

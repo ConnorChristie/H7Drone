@@ -8,6 +8,8 @@
 
 #define USE_TASK_STATISTICS
 
+#define USB_TIMEOUT  50
+
 typedef uint8_t u8;
 typedef uint16_t u16;
 typedef uint32_t u32;
@@ -40,3 +42,10 @@ typedef u32 timeUs_t;
 
 #define DMA_RAM              __attribute__ ((section(".DMA_RAM")))
 #define DMA_RW_AXI           __attribute__ ((section(".DMA_RW_AXI")))
+
+// Chip Unique ID on H7
+#define U_ID_0 (*(uint32_t*)UID_BASE)
+#define U_ID_1 (*(uint32_t*)(UID_BASE + 4))
+#define U_ID_2 (*(uint32_t*)(UID_BASE + 8))
+
+void Error_Handler(void);

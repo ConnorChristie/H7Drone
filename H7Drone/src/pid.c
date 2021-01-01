@@ -84,12 +84,13 @@ void FAST_CODE pidUpdate(timeUs_t currentTimeUs)
 		//pid->D = -(2.0f * pid->Kd * (setpoint - pid->prevMeasurement) + (2.0f * pidRuntime.tau - dt) * pid->D) / (2.0f * pidRuntime.tau + dt);
 
 		pid->output = constrainf(pid->P + ff + pid->I, -pid->pidSumLimit, pid->pidSumLimit);
-		
+		pid->output /= pid->pidSumLimit * 2.0f;
+
 		pid->prevError = error;
 		//pid->prevMeasurement = setpoint;
 	}
 
-	if (getSetpointRate(CONTROL_THROTTLE) <= -666)
+	if (isThrottleDown())
 	{
 		pidResetITerm();
 	}

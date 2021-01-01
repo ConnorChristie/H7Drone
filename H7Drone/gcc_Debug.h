@@ -541,6 +541,9 @@
 #ifndef __FRACT_IBIT__
 #define __FRACT_IBIT__ 0
 #endif
+#ifndef USE_USB_FS
+#define USE_USB_FS 1
+#endif
 #ifndef __PTRDIFF_MAX__
 #define __PTRDIFF_MAX__ 0x7fffffff
 #endif
@@ -1433,6 +1436,8 @@
 //$(BSP_ROOT)/STM32H7xxxx/CMSIS_HAL/Device/ST/STM32H7xx/Include
 //$(BSP_ROOT)/STM32H7xxxx/CMSIS_HAL/Include
 //$(BSP_ROOT)/STM32H7xxxx/CMSIS_HAL/RTOS2/Include
+//$(BSP_ROOT)/STM32H7xxxx/STM32_USB_Device_Library/Core/Inc
+//$(BSP_ROOT)/STM32H7xxxx/STM32_USB_Device_Library/Class/CDC/Inc
 //$(EFP_BASE)/Profiler
 //$(TOOLCHAIN_ROOT)\arm-none-eabi\include\c++\9.3.1
 //$(TOOLCHAIN_ROOT)\arm-none-eabi\include\c++\9.3.1\arm-none-eabi\thumb\v7e-m+dp\hard
@@ -1440,6 +1445,7 @@
 //$(TOOLCHAIN_ROOT)\lib\gcc\arm-none-eabi\9.3.1\include
 //$(TOOLCHAIN_ROOT)\lib\gcc\arm-none-eabi\9.3.1\include-fixed
 //$(TOOLCHAIN_ROOT)\arm-none-eabi\include
+//src
 // --- Include directories end --- //
 
 
